@@ -1,5 +1,5 @@
 250 2 5 2
-patient
+positive
 0 1
 0 1
 2 1
@@ -10,7 +10,7 @@ patient
 0 1
 2 1
 0 1
-normal
+negative
 0 1
 0 1
 0 1

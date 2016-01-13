@@ -291,17 +291,17 @@ run_result single_run(Classifier<vector<vector<double> >, bool> *C, vector<pair<
 run_result crossvalidate(Classifier<vector<vector<double> >, bool> *C, vector<pair<vector<vector<double> >, bool> > &training_set, int fold_cnt)
 {
     int total = training_set.size();
-    int total_patient = 0, total_normal = 0;
+    int total_positive = 0, total_negative = 0;
     for (uint i=0;i<training_set.size();i++)
     {
-        if (training_set[i].second) total_patient++;
-        else total_normal++;
+        if (training_set[i].second) total_positive++;
+        else total_negative++;
     }
     
-    int fold_size_patient = total_patient / fold_cnt;
-    int fold_size_normal = total_normal / fold_cnt;
-    int rem_patient = total_patient % fold_cnt;
-    int rem_normal = total_normal % fold_cnt;
+    int fold_size_positive = total_positive / fold_cnt;
+    int fold_size_negative = total_negative / fold_cnt;
+    int rem_positive = total_positive % fold_cnt;
+    int rem_negative = total_negative % fold_cnt;
     
     vector<vector<pair<vector<vector<double> >, bool> > > folds;
     folds.resize(fold_cnt);
@@ -309,29 +309,29 @@ run_result crossvalidate(Classifier<vector<vector<double> >, bool> *C, vector<pa
     int *fold_size = new int[fold_cnt];
     for (int i=0;i<fold_cnt;i++)
     {
-        fold_size[i] = fold_size_patient + (i < rem_patient) + fold_size_normal + (i < rem_normal);
+        fold_size[i] = fold_size_positive + (i < rem_positive) + fold_size_negative + (i < rem_negative);
         folds[i].resize(fold_size[i]);
     }
     
-    int curr_patient_fold = 0, curr_normal_fold = 0;
-    int curr_patient_fold_size = fold_size_patient + (rem_patient > 0);
-    int curr_normal_fold_size = fold_size_normal + (rem_normal > 0);
+    int curr_positive_fold = 0, curr_negative_fold = 0;
+    int curr_positive_fold_size = fold_size_positive + (rem_positive > 0);
+    int curr_negative_fold_size = fold_size_negative + (rem_negative > 0);
     
     for (uint i=0;i<training_set.size();i++)
     {
         if (training_set[i].second)
         {
-            folds[curr_patient_fold][--fold_size[curr_patient_fold]].second = training_set[i].second;
-            folds[curr_patient_fold][fold_size[curr_patient_fold]].first.resize(training_set[i].first.size());
-            copy(training_set[i].first.begin(), training_set[i].first.end(), folds[curr_patient_fold][fold_size[curr_patient_fold]].first.begin());
-            if (--curr_patient_fold_size == 0) curr_patient_fold_size = fold_size_patient + (++curr_patient_fold < rem_patient);
+            folds[curr_positive_fold][--fold_size[curr_positive_fold]].second = training_set[i].second;
+            folds[curr_positive_fold][fold_size[curr_positive_fold]].first.resize(training_set[i].first.size());
+            copy(training_set[i].first.begin(), training_set[i].first.end(), folds[curr_positive_fold][fold_size[curr_positive_fold]].first.begin());
+            if (--curr_positive_fold_size == 0) curr_positive_fold_size = fold_size_positive + (++curr_positive_fold < rem_positive);
         }
         else
         {
-            folds[curr_normal_fold][--fold_size[curr_normal_fold]].second = training_set[i].second;
-            folds[curr_normal_fold][fold_size[curr_normal_fold]].first.resize(training_set[i].first.size());
-            copy(training_set[i].first.begin(), training_set[i].first.end(), folds[curr_normal_fold][fold_size[curr_normal_fold]].first.begin());
-            if (--curr_normal_fold_size == 0) curr_normal_fold_size = fold_size_normal + (++curr_normal_fold < rem_normal);
+            folds[curr_negative_fold][--fold_size[curr_negative_fold]].second = training_set[i].second;
+            folds[curr_negative_fold][fold_size[curr_negative_fold]].first.resize(training_set[i].first.size());
+            copy(training_set[i].first.begin(), training_set[i].first.end(), folds[curr_negative_fold][fold_size[curr_negative_fold]].first.begin());
+            if (--curr_negative_fold_size == 0) curr_negative_fold_size = fold_size_negative + (++curr_negative_fold < rem_negative);
         }
     }
     
@@ -471,7 +471,7 @@ vector<pair<vector<vector<double> >, bool> > extract_data(char* filename)
                 fscanf(f, "%lf", &ret[i].first[j][k]);
             }
         }
-        ret[i].second = (strcmp(expected_outcome, "patient") == 0);
+        ret[i].second = (strcmp(expected_outcome, "positive") == 0);
     }
     
     fclose(f);

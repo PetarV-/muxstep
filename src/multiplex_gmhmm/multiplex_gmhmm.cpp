@@ -50,11 +50,85 @@ MultiplexGMHMM::MultiplexGMHMM(int n, int obs, int L) : n(n), obs(obs), L(L)
     }
 }
 
+MultiplexGMHMM::MultiplexGMHMM(int n, int obs, int L, vector<GMHMM*> layers, double **omega) : n(n), obs(obs), L(L)
+{
+    this -> layers.resize(L);
+    for (int i=0;i<L;i++)
+    {
+        this -> layers[i] = new GMHMM(layers[i]);
+    }
+
+    this -> omega = new double*[L];
+    for (int i=0;i<L;i++)
+    {
+        this -> omega[i] = new double[L];
+        for (int j=0;j<L;j++)
+        {
+            this -> omega[i][j] = omega[i][j];
+        }
+    }
+}
+
+MultiplexGMHMM::MultiplexGMHMM(int n, int obs, int L, FILE *f) : n(n), obs(obs), L(L)
+{
+    this -> layers.resize(L);
+    for (int i=0;i<L;i++)
+    {
+        this -> layers[i] = new GMHMM(n, obs, f);
+    }
+
+    this -> omega = new double*[L];
+    for (int i=0;i<L;i++)
+    {
+        this -> omega[i] = new double[L];
+        for (int j=0;j<L;j++)
+        {
+            fscanf(f, "%lf", &this -> omega[i][j]);
+        }
+    }
+}
+
+MultiplexGMHMM::MultiplexGMHMM(MultiplexGMHMM *m_gmhmm) : n(m_gmhmm -> n), obs(m_gmhmm -> obs), L(m_gmhmm -> L)
+{
+    layers.resize(m_gmhmm -> L);
+    for (int i=0;i<m_gmhmm->L;i++)
+    {
+        layers[i] = new GMHMM(m_gmhmm -> layers[i]);
+    }
+
+    omega = new double*[m_gmhmm -> L];
+    for (int i=0;i<m_gmhmm->L;i++)
+    {
+        omega[i] = new double[m_gmhmm -> L];
+        for (int j=0;j<m_gmhmm->L;j++)
+        {
+            omega[i][j] = m_gmhmm -> omega[i][j];
+        }
+    }
+}
+
 MultiplexGMHMM::~MultiplexGMHMM()
 {
     for (int i=0;i<L;i++) delete layers[i];
     for (int i=0;i<L;i++) delete[] omega[i];
     delete[] omega;
+}
+
+void MultiplexGMHMM::dump(FILE *f)
+{
+    for (int i=0;i<L;i++)
+    {
+        this -> layers[i] -> dump(f);
+    }
+
+    for (int i=0;i<L;i++)
+    {
+        for (int j=0;j<L;j++)
+        {
+            fprintf(f, "%lf ", this -> omega[i][j]);
+        }
+        fprintf(f, "\n");
+    }
 }
 
 void MultiplexGMHMM::set_omega(double **omega)
@@ -319,3 +393,4 @@ void MultiplexGMHMM::dump_muxviz_data(char *nodes_filename, char *base_layers_fi
     
     printf("Done.\n");
 }
+

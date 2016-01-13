@@ -24,7 +24,11 @@ private:
 public:
     GMHMM(int n, int obs); // initialise a random GMHMM
     GMHMM(int n, int obs, double *pi, double **T, double **O, double *mu, double *sigma); // load a known GMHMM
+    GMHMM(int n, int obs, FILE *f); // load a GMHMM from a file
+    GMHMM(GMHMM *gmhmm); // copy an existing GMHMM
     ~GMHMM();
+
+    void dump(FILE *f);
     
     std::tuple<double**, double*, double> forward(std::vector<std::pair<double, int> > &Y);
     double** backward(std::vector<std::pair<double, int> > &Y, double *c);

@@ -29,11 +29,30 @@ typedef unsigned int uint;
 typedef long long lld;
 typedef unsigned long long llu;
 
-MultiplexGMHMMClassifier::MultiplexGMHMMClassifier(int sub_count, int type_count, int node_count) : sub_count(sub_count), type_count(type_count), node_count(node_count)
+MultiplexGMHMMClassifier::MultiplexGMHMMClassifier(int node_count, int sub_count, int type_count) : node_count(node_count), sub_count(sub_count), type_count(type_count)
 {
     positive_model = new MultiplexGMHMM(node_count, sub_count, type_count);
     negative_model = new MultiplexGMHMM(node_count, sub_count, type_count);
     thresholds.clear();
+}
+
+MultiplexGMHMMClassifier::MultiplexGMHMMClassifier(int node_count, int sub_count, int type_count, MultiplexGMHMM *positive, MultiplexGMHMM *negative) : node_count(node_count), sub_count(sub_count), type_count(type_count)
+{
+    positive_model = new MultiplexGMHMM(positive);
+    negative_model = new MultiplexGMHMM(negative);
+    thresholds.clear();
+}
+
+MultiplexGMHMMClassifier::MultiplexGMHMMClassifier(char *filename)
+{
+    FILE *f = fopen(filename, "r");
+
+    fscanf(f, "%d%d%d", &node_count, &sub_count, &type_count);
+
+    positive_model = new MultiplexGMHMM(node_count, sub_count, type_count, f);
+    negative_model = new MultiplexGMHMM(node_count, sub_count, type_count, f);
+
+    fclose(f);
 }
 
 MultiplexGMHMMClassifier::~MultiplexGMHMMClassifier()
@@ -42,10 +61,27 @@ MultiplexGMHMMClassifier::~MultiplexGMHMMClassifier()
     delete negative_model;
 }
 
-Classifier* MultiplexGMHMMClassifier::clone()
+Classifier<vector<vector<double> >, bool>* MultiplexGMHMMClassifier::clone()
 {
-    MultiplexGMHMMClassifier *C = new MultiplexGMHMMClassifier(sub_count, type_count, node_count, positive_model, negative_model);
-    return (Classifier*)C;
+    return new MultiplexGMHMMClassifier(sub_count, type_count, node_count, positive_model, negative_model);
+}
+
+void MultiplexGMHMMClassifier::dump(char *filename)
+{
+    FILE *f = fopen(filename, "w");
+
+    fprintf(f, "%d %d %d\n", node_count, sub_count, type_count);
+
+    positive_model -> dump(f);
+    negative_model -> dump(f);
+
+    fclose(f);
+}
+
+void MultiplexGMHMMClassifier::dump_muxviz(char *positive_nodes_filename, char *positive_base_layers_filename, char *negative_nodes_filename, char *negative_base_layers_filename)
+{
+    positive_model -> dump_muxviz_data(positive_nodes_filename, positive_base_layers_filename);
+    negative_model -> dump_muxviz_data(negative_nodes_filename, negative_base_layers_filename);
 }
 
 void MultiplexGMHMMClassifier::train(vector<pair<vector<vector<double> >, bool> > &training_set)

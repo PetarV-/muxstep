@@ -23,8 +23,12 @@ private:
     std::vector<std::function<double(std::vector<double>)> > objectives;
 public:
     MultiplexGMHMM(int n, int obs, int L); // initialise a random multiplex GMHMM
-    MultiplexGMHMM(int n, int obs, int L, std::vector<GMHMM*> layers, double **omega); // initialise a GMHMM from parameters 
+    MultiplexGMHMM(int n, int obs, int L, std::vector<GMHMM*> layers, double **omega); // initialise a multiplex GMHMM from parameters
+    MultiplexGMHMM(int n, int obs, int L, FILE *f); // read the multiplex GMHMM from a file
+    MultiplexGMHMM(MultiplexGMHMM *m_gmhmm); // Copy constructor
     ~MultiplexGMHMM();
+
+    void dump(FILE *f);
     
     void set_omega(double **omega);
     void train(std::vector<std::vector<std::vector<double> > > &train_set);

@@ -121,6 +121,77 @@ GMHMM::GMHMM(int n, int obs, double *pi, double **T, double **O, double *mu, dou
     }
 }
 
+GMHMM::GMHMM(int n, int obs, FILE *f) : n(n), obs(obs)
+{
+    this -> pi = new double[n];
+    for (int i=0;i<n;i++)
+    {
+        fscanf(f, "%lf", &this -> pi[i]);
+    }
+
+    this -> T = new double*[n];
+    for (int i=0;i<n;i++)
+    {
+        this -> T[i] = new double[n];
+        for (int j=0;j<n;j++)
+        {
+            fscanf(f, "%lf", &this -> T[i][j]);
+        }
+    }
+
+    this -> O = new double*[n];
+    for (int i=0;i<n;i++)
+    {
+        this -> O[i] = new double[obs];
+        for (int j=0;j<obs;j++)
+        {
+            fscanf(f, "%lf", &this -> O[i][j]);
+        }
+    }
+
+    this -> mu = new double[obs];
+    this -> sigma = new double[obs];
+    for (int i=0;i<obs;i++)
+    {
+        fscanf(f, "%lf", &this -> mu[i]);
+        fscanf(f, "%lf", &this -> sigma[i]);
+    }
+}
+
+GMHMM::GMHMM(GMHMM *gmhmm) : n(gmhmm -> n), obs(gmhmm -> obs)
+{
+    this -> pi = new double[gmhmm -> n];
+    for (int i=0;i<gmhmm->n;i++) this -> pi[i] = gmhmm -> pi[i];
+    
+    this -> T = new double*[gmhmm -> n];
+    for (int i=0;i<gmhmm->n;i++)
+    {
+        this -> T[i] = new double[gmhmm -> n];
+        for (int j=0;j<gmhmm->n;j++)
+        {
+            this -> T[i][j] = gmhmm -> T[i][j];
+        }
+    }
+    
+    this -> O = new double*[gmhmm -> n];
+    for (int i=0;i<gmhmm->n;i++)
+    {
+        this -> O[i] = new double[gmhmm -> obs];
+        for (int j=0;j<gmhmm->obs;j++)
+        {
+            this -> O[i][j] = gmhmm -> O[i][j];
+        }
+    }
+    
+    this -> mu = new double[gmhmm -> obs];
+    this -> sigma = new double[gmhmm -> obs];
+    for (int i=0;i<gmhmm->obs;i++)
+    {
+        this -> mu[i] = gmhmm -> mu[i];
+        this -> sigma[i] = gmhmm -> sigma[i];
+    }
+}
+
 GMHMM::~GMHMM()
 {
     delete[] pi;
@@ -135,6 +206,38 @@ GMHMM::~GMHMM()
     
     delete[] mu;
     delete[] sigma;
+}
+
+void GMHMM::dump(FILE *f)
+{
+    for (int i=0;i<n;i++)
+    {
+        fprintf(f, "%lf ", pi[i]);
+    }
+    fprintf(f, "\n");
+
+    for (int i=0;i<n;i++)
+    {
+        for (int j=0;j<n;j++)
+        {
+            fprintf(f, "%lf ", T[i][j]);
+        }
+        fprintf(f, "\n");
+    }
+
+    for (int i=0;i<n;i++)
+    {
+        for (int j=0;j<obs;j++)
+        {
+            fprintf(f, "%lf ", O[i][j]);
+        }
+        fprintf(f, "\n");
+    }
+
+    for (int i=0;i<obs;i++)
+    {
+        fprintf(f, "%lf %lf\n", mu[i], sigma[i]);
+    }
 }
 
 tuple<double**, double*, double> GMHMM::forward(vector<pair<double, int> > &Y)
