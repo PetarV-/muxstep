@@ -193,7 +193,8 @@ void parallel_run(Classifier<vector<vector<double> >, bool> *C, vector<pair<vect
     ret.false_negatives = ret.true_negatives = 0;
     
     C -> train(training_set);
-    
+    printf("SUCC_TRAIN\n");
+
     int total = test_set.size();
     int total_positives = 0, total_negatives = 0;
     
@@ -273,7 +274,7 @@ run_result single_run(Classifier<vector<vector<double> >, bool> *C, vector<pair<
             thrs.push_back(thread(&parallel_run, C -> clone(), ref(training_set), ref(test_set), ref(ret[i])));
         }
         
-        parallel_run(C, training_set, test_set, ret[num_threads - 1]);
+        parallel_run(C -> clone(), training_set, test_set, ret[num_threads - 1]);
         
         for (int i=0;i<num_threads - 1;i++)
         {
@@ -446,7 +447,7 @@ void noise_test(Classifier<vector<vector<double> >, bool> *C, vector<pair<vector
 vector<pair<vector<vector<double> >, bool> > extract_data(char* filename)
 {
     int total;
-    int gene_count, type_count;
+    int sub_count, type_count;
     char expected_outcome[101];
     
     vector<pair<vector<vector<double> >, bool> > ret;
@@ -454,19 +455,19 @@ vector<pair<vector<vector<double> >, bool> > extract_data(char* filename)
     FILE *f = fopen(filename, "r");
     
     fscanf(f, "%d", &total);
-    fscanf(f, "%d%d", &gene_count, &type_count);
+    fscanf(f, "%d%d", &sub_count, &type_count);
     
     ret.resize(total);
     
     for (int i=0;i<total;i++)
     {
-        ret[i].first.resize(gene_count);
-        for (int j=0;j<gene_count;j++) ret[i].first[j].resize(type_count);
+        ret[i].first.resize(sub_count);
+        for (int j=0;j<sub_count;j++) ret[i].first[j].resize(type_count);
         
         fscanf(f, "%s", expected_outcome);
         for (int k=0;k<type_count;k++)
         {
-            for (int j=0;j<gene_count;j++)
+            for (int j=0;j<sub_count;j++)
             {
                 fscanf(f, "%lf", &ret[i].first[j][k]);
             }
