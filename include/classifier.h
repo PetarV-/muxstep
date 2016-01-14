@@ -16,7 +16,7 @@ public:
     virtual std::vector<double> get_thresholds() = 0; // Needed by the evaluator (for extracting ROC data)
 };
 
-class MultiplexGMHMMClassifier : public Classifier<std::vector<std::vector<double> >, bool>
+class MultiplexGMHMMClassifier : public Classifier<std::vector<std::pair<int, std::vector<double> > >, bool>
 {
 private:
     int node_count; // the number of nodes in each layer
@@ -38,8 +38,8 @@ public:
     void dump(char *filename); // dump the model parameters into a file for later use
     void dump_muxviz(char *positive_nodes_filename, char *positive_base_layers_filename, char *negative_nodes_filename, char *negative_base_layers_filename); // dump the positive and negative models into a format readable by muxViz
 
-    void train(std::vector<std::pair<std::vector<std::vector<double> >, bool> > &training_set);
-    bool classify(std::vector<std::vector<double> > &test_data);
+    void train(std::vector<std::pair<std::vector<std::pair<int, std::vector<double> > >, bool> > &training_set);
+    bool classify(std::vector<std::pair<int, std::vector<double> > > &test_data);
     
     std::vector<double> get_thresholds();
 };
