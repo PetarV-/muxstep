@@ -31,8 +31,8 @@ public:
     void dump(FILE *f);
     
     void set_omega(double **omega);
-    void train(std::vector<std::vector<std::vector<double> > > &train_set);
-    double log_likelihood(std::vector<std::vector<double> > &test_data);
+    void train(std::vector<std::vector<std::pair<int, std::vector<double> > > > &train_set);
+    double log_likelihood(std::vector<std::pair<int, std::vector<double> > > &test_data);
     
     void dump_muxviz_data(char *nodes_filename, char *base_layers_filename);
 };

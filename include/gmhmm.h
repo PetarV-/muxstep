@@ -30,19 +30,16 @@ public:
 
     void dump(FILE *f);
     
-    std::tuple<double**, double*, double> forward(std::vector<std::pair<double, int> > &Y);
-    double** backward(std::vector<std::pair<double, int> > &Y, double *c);
-    void baumwelch(std::vector<std::vector<double> > &Ys, int iterations, double tolerance);
-    void baumwelch(std::vector<std::vector<std::pair<double, int> > > &sorted_Ys, int iterations, double tolerance); // sorted
+    std::tuple<double**, double*, double> forward(std::vector<std::pair<int, double> > &Y);
+    double** backward(std::vector<std::pair<int, double> > &Y, double *c);
+    void baumwelch(std::vector<std::vector<std::pair<int, double> > > &Ys, int iterations, double tolerance);
     
     double get_pi(int x);
     double get_T(int i, int j);
     double get_O(int x, int y);
     double get_probability(int obs_id, double x);
-    void train(std::vector<std::vector<double> > &train_set);
-    void train(std::vector<std::vector<std::pair<double, int> > > &train_set); // sorted
-    double log_likelihood(std::vector<double> &test_data);
-    double log_likelihood(std::vector<std::pair<double, int> > &sorted_data); // sorted
+    void train(std::vector<std::vector<std::pair<int, double> > > &train_set);
+    double log_likelihood(std::vector<std::pair<int, double> > &test_data);
 };
 
 #endif
