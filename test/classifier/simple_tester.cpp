@@ -30,8 +30,6 @@ typedef unsigned int uint;
 typedef long long lld;
 typedef unsigned long long llu;
 
-Classifier<vector<vector<double> >, bool> *C;
-
 int main(int argc, char **argv)
 {
     if (argc != 5)
@@ -51,7 +49,7 @@ int main(int argc, char **argv)
     int sub_count = data[0].first.size();
     int type_count = data[0].first[0].size();
 
-    Classifier<vector<vector<double> >, bool> *C = new MultiplexGMHMMClassifier(node_count, sub_count, type_count);
+    Classifier<vector<pair<int, vector<double> > >, bool> *C = new MultiplexGMHMMClassifier(node_count, sub_count, type_count);
 
     noise_test(C, data, mu_lo, mu_step, mu_hi, sigma_lo, sigma_step, sigma_hi);
     

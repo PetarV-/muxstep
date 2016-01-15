@@ -260,7 +260,7 @@ void parallel_run(Classifier<vector<vector<double> >, bool> *C, vector<pair<vect
     delete C;
 }
 
-run_result single_run(Classifier<vector<vector<double> >, bool> *C, vector<pair<vector<vector<double> >, bool> > &training_set, vector<pair<vector<vector<double> >, bool> > &test_set, int num_tests, int num_threads)
+run_result single_run(Classifier<vector<pair<int, vector<double> > >, bool> *C, vector<pair<vector<vector<double> >, bool> > &training_set, vector<pair<vector<vector<double> >, bool> > &test_set, int num_tests, int num_threads)
 {
     run_result max_run;
     max_run.accuracy = -1.0;

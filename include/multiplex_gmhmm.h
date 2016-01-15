@@ -7,6 +7,7 @@
 #define MULTIPLEX_GMHMM
 
 #include <functional>
+#include <iostream>
 #include <vector>
 
 #include <gmhmm.h>
@@ -24,17 +25,17 @@ private:
 public:
     MultiplexGMHMM(int n, int obs, int L); // initialise a random multiplex GMHMM
     MultiplexGMHMM(int n, int obs, int L, std::vector<GMHMM*> layers, double **omega); // initialise a multiplex GMHMM from parameters
-    MultiplexGMHMM(int n, int obs, int L, FILE *f); // read the multiplex GMHMM from a file
     MultiplexGMHMM(MultiplexGMHMM *m_gmhmm); // Copy constructor
     ~MultiplexGMHMM();
 
-    void dump(FILE *f);
-    
     void set_omega(double **omega);
     void train(std::vector<std::vector<std::pair<int, std::vector<double> > > > &train_set);
     double log_likelihood(std::vector<std::pair<int, std::vector<double> > > &test_data);
     
     void dump_muxviz_data(char *nodes_filename, char *base_layers_filename);
+    
+    friend std::istream& operator>>(std::istream& in, MultiplexGMHMM *&M);
+    friend std::ostream& operator<<(std::ostream& out, const MultiplexGMHMM *M);
 };
 
 #endif

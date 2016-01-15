@@ -1,6 +1,7 @@
 #ifndef CLASSIFIER
 #define CLASSIFIER
 
+#include <iostream>
 #include <vector>
 
 #include <multiplex_gmhmm.h>
@@ -30,18 +31,19 @@ private:
 public:
     MultiplexGMHMMClassifier(int node_count, int sub_count, int type_count); // initialise a random multiplex GMHMM
     MultiplexGMHMMClassifier(int node_count, int sub_count, int type_count, MultiplexGMHMM *positive, MultiplexGMHMM *negative); // initialise a multiplex GMHMM from parameters 
-    MultiplexGMHMMClassifier(char *filename); // load from a file given in the necessary format
     ~MultiplexGMHMMClassifier();
 
-    Classifier<std::vector<std::vector<double> >, bool>* clone();
+    Classifier<std::vector<std::pair<int, std::vector<double> > >, bool>* clone();
     
-    void dump(char *filename); // dump the model parameters into a file for later use
     void dump_muxviz(char *positive_nodes_filename, char *positive_base_layers_filename, char *negative_nodes_filename, char *negative_base_layers_filename); // dump the positive and negative models into a format readable by muxViz
 
     void train(std::vector<std::pair<std::vector<std::pair<int, std::vector<double> > >, bool> > &training_set);
     bool classify(std::vector<std::pair<int, std::vector<double> > > &test_data);
     
     std::vector<double> get_thresholds();
+
+    friend std::istream& operator>>(std::istream &in, MultiplexGMHMMClassifier *&C);
+    friend std::ostream& operator<<(std::ostream &out, const MultiplexGMHMMClassifier *C);
 };
 
 #endif

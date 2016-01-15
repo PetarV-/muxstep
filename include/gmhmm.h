@@ -6,6 +6,7 @@
 #ifndef GM_HIDDEN_MARKOV_MODEL
 #define GM_HIDDEN_MARKOV_MODEL
 
+#include <iostream>
 #include <tuple>
 #include <vector>
 
@@ -24,12 +25,9 @@ private:
 public:
     GMHMM(int n, int obs); // initialise a random GMHMM
     GMHMM(int n, int obs, double *pi, double **T, double **O, double *mu, double *sigma); // load a known GMHMM
-    GMHMM(int n, int obs, FILE *f); // load a GMHMM from a file
     GMHMM(GMHMM *gmhmm); // copy an existing GMHMM
     ~GMHMM();
 
-    void dump(FILE *f);
-    
     std::tuple<double**, double*, double> forward(std::vector<std::pair<int, double> > &Y);
     double** backward(std::vector<std::pair<int, double> > &Y, double *c);
     void baumwelch(std::vector<std::vector<std::pair<int, double> > > &Ys, int iterations, double tolerance);
@@ -38,8 +36,12 @@ public:
     double get_T(int i, int j);
     double get_O(int x, int y);
     double get_probability(int obs_id, double x);
+
     void train(std::vector<std::vector<std::pair<int, double> > > &train_set);
     double log_likelihood(std::vector<std::pair<int, double> > &test_data);
+
+    friend std::istream& operator>>(std::istream &in, GMHMM *&G);
+    friend std::ostream& operator<<(std::ostream &out, const GMHMM *G);
 };
 
 #endif

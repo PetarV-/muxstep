@@ -121,43 +121,6 @@ GMHMM::GMHMM(int n, int obs, double *pi, double **T, double **O, double *mu, dou
     }
 }
 
-GMHMM::GMHMM(int n, int obs, FILE *f) : n(n), obs(obs)
-{
-    this -> pi = new double[n];
-    for (int i=0;i<n;i++)
-    {
-        fscanf(f, "%lf", &this -> pi[i]);
-    }
-
-    this -> T = new double*[n];
-    for (int i=0;i<n;i++)
-    {
-        this -> T[i] = new double[n];
-        for (int j=0;j<n;j++)
-        {
-            fscanf(f, "%lf", &this -> T[i][j]);
-        }
-    }
-
-    this -> O = new double*[n];
-    for (int i=0;i<n;i++)
-    {
-        this -> O[i] = new double[obs];
-        for (int j=0;j<obs;j++)
-        {
-            fscanf(f, "%lf", &this -> O[i][j]);
-        }
-    }
-
-    this -> mu = new double[obs];
-    this -> sigma = new double[obs];
-    for (int i=0;i<obs;i++)
-    {
-        fscanf(f, "%lf", &this -> mu[i]);
-        fscanf(f, "%lf", &this -> sigma[i]);
-    }
-}
-
 GMHMM::GMHMM(GMHMM *gmhmm) : n(gmhmm -> n), obs(gmhmm -> obs)
 {
     this -> pi = new double[gmhmm -> n];
@@ -206,38 +169,6 @@ GMHMM::~GMHMM()
     
     delete[] mu;
     delete[] sigma;
-}
-
-void GMHMM::dump(FILE *f)
-{
-    for (int i=0;i<n;i++)
-    {
-        fprintf(f, "%lf ", pi[i]);
-    }
-    fprintf(f, "\n");
-
-    for (int i=0;i<n;i++)
-    {
-        for (int j=0;j<n;j++)
-        {
-            fprintf(f, "%lf ", T[i][j]);
-        }
-        fprintf(f, "\n");
-    }
-
-    for (int i=0;i<n;i++)
-    {
-        for (int j=0;j<obs;j++)
-        {
-            fprintf(f, "%lf ", O[i][j]);
-        }
-        fprintf(f, "\n");
-    }
-
-    for (int i=0;i<obs;i++)
-    {
-        fprintf(f, "%lf %lf\n", mu[i], sigma[i]);
-    }
 }
 
 tuple<double**, double*, double> GMHMM::forward(vector<pair<double, int> > &Y)
@@ -833,3 +764,85 @@ double GMHMM::log_likelihood(vector<pair<double, int> > &sorted_data)
     
     return get<2>(x);
 }
+
+istream& operator>>(istream &in, GMHMM *&G)
+{
+    if (G != NULL) delete G;
+    
+    int n, obs;
+    in >> n >> obs;
+
+    double *pi = new double[n];
+    for (int i=0;i<n;i++)
+    {
+        in >> pi[i];
+    }
+
+    double **T = new double*[n];
+    for (int i=0;i<n;i++)
+    {
+        T[i] = new double[n];
+        for (int j=0;j<n;j++)
+        {
+            in >> T[i][j];
+        }
+    }
+
+    double **O = new double*[n];
+    for (int i=0;i<n;i++)
+    {
+        O[i] = new double[obs];
+        for (int j=0;j<obs;j++)
+        {
+            in >> O[i][j];
+        }
+    }
+
+    double *mu = new double[obs];
+    double *sigma = new double[obs];
+    for (int i=0;i<obs;i++)
+    {
+        in >> mu[i] >> sigma[i];
+    }
+
+    G = new GMHMM(n, obs, pi, T, O, mu, sigma);
+
+    return in;
+}
+
+ostream& operator<<(ostream &out, const GMHMM *G)
+{
+    out << G -> n << " " << G -> obs << endl;
+
+    for (int i=0;i<G->n;i++)
+    {
+        out << G -> pi[i] << " ";
+    }
+    out << endl;
+
+    for (int i=0;i<G->n;i++)
+    {
+        for (int j=0;j<G->n;j++)
+        {
+            out << G -> T[i][j] << " ";
+        }
+        out << endl;
+    }
+
+    for (int i=0;i<G->n;i++)
+    {
+        for (int j=0;j<G->obs;j++)
+        {
+            out << G -> O[i][j] << " ";
+        }
+        out << endl;
+    }
+
+    for (int i=0;i<G->obs;i++)
+    {
+        out << G -> mu[i] << " " << G -> sigma[i] << endl;
+    }
+
+    return out;
+}
+

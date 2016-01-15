@@ -69,25 +69,6 @@ MultiplexGMHMM::MultiplexGMHMM(int n, int obs, int L, vector<GMHMM*> layers, dou
     }
 }
 
-MultiplexGMHMM::MultiplexGMHMM(int n, int obs, int L, FILE *f) : n(n), obs(obs), L(L)
-{
-    this -> layers.resize(L);
-    for (int i=0;i<L;i++)
-    {
-        this -> layers[i] = new GMHMM(n, obs, f);
-    }
-
-    this -> omega = new double*[L];
-    for (int i=0;i<L;i++)
-    {
-        this -> omega[i] = new double[L];
-        for (int j=0;j<L;j++)
-        {
-            fscanf(f, "%lf", &this -> omega[i][j]);
-        }
-    }
-}
-
 MultiplexGMHMM::MultiplexGMHMM(MultiplexGMHMM *m_gmhmm) : n(m_gmhmm -> n), obs(m_gmhmm -> obs), L(m_gmhmm -> L)
 {
     layers.resize(m_gmhmm -> L);
@@ -112,23 +93,6 @@ MultiplexGMHMM::~MultiplexGMHMM()
     for (int i=0;i<L;i++) delete layers[i];
     for (int i=0;i<L;i++) delete[] omega[i];
     delete[] omega;
-}
-
-void MultiplexGMHMM::dump(FILE *f)
-{
-    for (int i=0;i<L;i++)
-    {
-        this -> layers[i] -> dump(f);
-    }
-
-    for (int i=0;i<L;i++)
-    {
-        for (int j=0;j<L;j++)
-        {
-            fprintf(f, "%lf ", this -> omega[i][j]);
-        }
-        fprintf(f, "\n");
-    }
 }
 
 void MultiplexGMHMM::set_omega(double **omega)
@@ -392,5 +356,55 @@ void MultiplexGMHMM::dump_muxviz_data(char *nodes_filename, char *base_layers_fi
     }
     
     printf("Done.\n");
+}
+
+istream& operator>>(istream &in, MultiplexGMHMM *&M)
+{
+    if (M == NULL) delete M;
+
+    int n, obs, L;
+    in >> n >> obs >> L;
+
+    vector<GMHMM*> layers;
+    layers.resize(L);
+    for (int i=0;i<L;i++)
+    {
+        in >> layers[i];
+    }
+
+    double **omega = new double*[L];
+    for (int i=0;i<L;i++)
+    {
+        this -> omega[i] = new double[L];
+        for (int j=0;j<L;j++)
+        {
+            in >> omega[i][j];
+        }
+    }
+
+    M = new MultiplexGMHMM(n, obs, L, layers, omega);
+
+    return in;
+}
+
+ostream& operator<<(ostream &out, const MultiplexGMHMM *M)
+{
+    out << M -> n << " " << M -> obs << " " << M -> L << endl;
+
+    for (int i=0;i<M->L;i++)
+    {
+        out << M -> layers[i];
+    }
+
+    for (int i=0;i<M->L;i++)
+    {
+        for (int j=0;j<M->L;j++)
+        {
+            out << M -> omega[i][j] << " ";
+        }
+        out << endl;
+    }
+
+    return out;
 }
 
