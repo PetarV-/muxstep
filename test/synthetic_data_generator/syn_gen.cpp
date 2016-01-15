@@ -27,6 +27,21 @@ using namespace std;
 typedef long long lld;
 typedef unsigned long long llu;
 
+bool super_awesome_comparator(pair<int, vector<double> > a, pair<int, vector<double> > b)
+{
+    double norm_sq_a = 0.0, norm_sq_b = 0.0;
+
+    assert(a.second.size() == b.second.size());
+
+    for (uint i=0;i<a.second.size();i++)
+    {
+        norm_sq_a += a.second[i] * a.second[i];
+        norm_sq_b += b.second[i] * b.second[i];
+    }
+
+    return norm_sq_a > norm_sq_b;
+}
+
 int main(int argc, char **argv)
 {
     if (argc != 3)
@@ -68,15 +83,32 @@ int main(int argc, char **argv)
                 N[t][i] = normal_distribution<double>(mean, stddev);
             }
         }
-    
+
         for (int i=0;i<n;i++)
         {
-            fprintf(g, "%s\n", label);
-            for (int t=0;t<types;t++)
+            fprintf(g, "%s %d\n", label, len);
+
+            vector<pair<int, vector<double> > > data;
+            data.resize(len);
+            
+            for (int j=0;j<len;j++)
             {
-                for (int j=0;j<len;j++)
+                data[j].first = j;
+                data[j].second.resize(types);
+                for (int t=0;t<types;t++)
                 {
-                    fprintf(g, "%lf ", N[t][j](generator));
+                    data[j].second[t] = N[t][j](generator);
+                }
+            }
+
+            sort(data.begin(), data.end(), super_awesome_comparator);
+
+            for (int j=0;j<len;j++)
+            {
+                fprintf(g, "%d ", data[j].first);
+                for (int t=0;t<types;t++)
+                {
+                    fprintf(g, "%lf ", data[j].second[t]);
                 }
                 fprintf(g, "\n");
             }
