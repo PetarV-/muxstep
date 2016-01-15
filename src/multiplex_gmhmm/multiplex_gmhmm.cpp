@@ -112,17 +112,19 @@ void MultiplexGMHMM::set_omega(double **omega)
     }
 }
 
-void MultiplexGMHMM::train(vector<vector<vector<double> > > &train_set)
+void MultiplexGMHMM::train(vector<vector<pair<int, vector<double> > > > &train_set)
 {
     // Train all the layers individually (as before)
     for (int l=0;l<L;l++)
     {
-        vector<vector<double> > curr_set(train_set.size(), vector<double>(obs));
+        vector<pair<int, vector<double> > > curr_set(train_set.size());
         for (uint i=0;i<train_set.size();i++)
         {
-            for (int j=0;j<obs;j++)
+            curr_set[i].second.resize(train_set[i].size());
+            for (uint j=0;j<train_set[i].size();j++)
             {
-                curr_set[i][j] = train_set[i][j][l];
+                curr_set[i].first = train_set[i][j].first;
+                curr_set[i].second[j] = train_set[i][j].second[l];
             }
         }
         layers[l] -> train(curr_set);
@@ -218,13 +220,8 @@ void MultiplexGMHMM::train(vector<vector<vector<double> > > &train_set)
     }
 }
 
-double MultiplexGMHMM::log_likelihood(vector<vector<double> > &test_data)
+double MultiplexGMHMM::log_likelihood(vector<pair<int, vector<double> > > &test_data)
 {
-    vector<pair<vector<double>, int> > sorted_data;
-    sorted_data.resize(test_data.size());
-    for (uint i=0;i<test_data.size();i++) sorted_data[i] = make_pair(test_data[i], i);
-    sort(sorted_data.begin(), sorted_data.end(), compare_euclidean);
-    
     double ret = 0.0;
     
     double ***A = new double**[test_data.size()];
@@ -242,16 +239,16 @@ double MultiplexGMHMM::log_likelihood(vector<vector<double> > &test_data)
     for (int i=0;i<L;i++) pi_sum += omega[i][i];
     for (int i=0;i<L;i++) pi[i] = omega[i][i] / pi_sum;
     
-    int first_gene = sorted_data[0].second;
+    int first_sub = test_data[0].first;
     double init_sum = 0.0;
     for (int i=0;i<L;i++)
     {
-        double curr_type_val = sorted_data[0].first[i];
-        double curr_prob = layers[i] -> get_probability(first_gene, curr_type_val);
+        double curr_type_val = test_data[0].second[i];
+        double curr_prob = layers[i] -> get_probability(first_sub, curr_type_val);
         for (int j=0;j<n;j++)
         {
             double curr_pi = layers[i] -> get_pi(j);
-            double curr_o = layers[i] -> get_O(j, first_gene);
+            double curr_o = layers[i] -> get_O(j, first_sub);
             A[0][i][j] = pi[i] * curr_pi * curr_o * curr_prob;
             init_sum += A[0][i][j];
         }
@@ -269,17 +266,17 @@ double MultiplexGMHMM::log_likelihood(vector<vector<double> > &test_data)
     for (uint t=1;t<test_data.size();t++)
     {
         double fullsum = 0.0;
-        int curr_gene = sorted_data[t].second;
+        int curr_sub = test_data[t].first;
         
         for (int i=0;i<L;i++)
         {
-            double curr_type_val = sorted_data[t].first[i];
-            double curr_prob = layers[i] -> get_probability(curr_gene, curr_type_val);
+            double curr_type_val = test_data[t].second[i];
+            double curr_prob = layers[i] -> get_probability(curr_sub, curr_type_val);
             
             for (int j=0;j<n;j++)
             {
                 double sum = 0.0;
-                double curr_g = layers[i] -> get_O(j, curr_gene);
+                double curr_g = layers[i] -> get_O(j, curr_sub);
                 
                 for (int ii=0;ii<L;ii++)
                 {
@@ -310,7 +307,7 @@ double MultiplexGMHMM::log_likelihood(vector<vector<double> > &test_data)
         ret += log(fullsum);
     }
     
-    for (int i=0;i<obs;i++)
+    for (uint i=0;i<test_data.size();i++)
     {
         for (int j=0;j<L;j++)
         {
