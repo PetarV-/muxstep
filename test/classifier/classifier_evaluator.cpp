@@ -187,13 +187,12 @@ run_result stderr_result(vector<run_result> &individual, run_result &means)
     return ret;
 }
 
-void parallel_run(Classifier<vector<vector<double> >, bool> *C, vector<pair<vector<vector<double> >, bool> > &training_set, vector<pair<vector<vector<double> >, bool> > &test_set, run_result &ret)
+void parallel_run(Classifier<vector<pair<int, vector<double> > >, bool> *C, vector<pair<vector<pair<int, vector<double> > >, bool> > &training_set, vector<pair<vector<pair<int, vector<double> > >, bool> > &test_set, run_result &ret)
 {
     ret.true_positives = ret.false_positives = 0;
     ret.false_negatives = ret.true_negatives = 0;
     
     C -> train(training_set);
-    printf("SUCC_TRAIN\n");
 
     int total = test_set.size();
     int total_positives = 0, total_negatives = 0;
@@ -260,7 +259,7 @@ void parallel_run(Classifier<vector<vector<double> >, bool> *C, vector<pair<vect
     delete C;
 }
 
-run_result single_run(Classifier<vector<pair<int, vector<double> > >, bool> *C, vector<pair<vector<vector<double> >, bool> > &training_set, vector<pair<vector<vector<double> >, bool> > &test_set, int num_tests, int num_threads)
+run_result single_run(Classifier<vector<pair<int, vector<double> > >, bool> *C, vector<pair<vector<pair<int, vector<double> > >, bool> > &training_set, vector<pair<vector<pair<int, vector<double> > >, bool> > &test_set, int num_tests, int num_threads)
 {
     run_result max_run;
     max_run.accuracy = -1.0;
@@ -290,7 +289,7 @@ run_result single_run(Classifier<vector<pair<int, vector<double> > >, bool> *C, 
     return max_run;
 }
 
-run_result crossvalidate(Classifier<vector<vector<double> >, bool> *C, vector<pair<vector<vector<double> >, bool> > &training_set, int fold_cnt)
+run_result crossvalidate(Classifier<vector<pair<int, vector<double> > >, bool> *C, vector<pair<vector<pair<int, vector<double> > >, bool> > &training_set, int fold_cnt)
 {
     int total = training_set.size();
     int total_positive = 0, total_negative = 0;
@@ -305,7 +304,7 @@ run_result crossvalidate(Classifier<vector<vector<double> >, bool> *C, vector<pa
     int rem_positive = total_positive % fold_cnt;
     int rem_negative = total_negative % fold_cnt;
     
-    vector<vector<pair<vector<vector<double> >, bool> > > folds;
+    vector<vector<pair<vector<pair<int, vector<double> > >, bool> > > folds;
     folds.resize(fold_cnt);
     
     int *fold_size = new int[fold_cnt];
@@ -343,7 +342,7 @@ run_result crossvalidate(Classifier<vector<vector<double> >, bool> *C, vector<pa
     individual.resize(fold_cnt);
     for (int i=0;i<fold_cnt;i++)
     {
-        vector<pair<vector<vector<double> >, bool> > curr_train, curr_test;
+        vector<pair<vector<pair<int, vector<double> > >, bool> > curr_train, curr_test;
         curr_test = folds[i];
         curr_train.reserve(total - folds[i].size());
         for (int j=0;j<fold_cnt;j++)
@@ -368,7 +367,7 @@ run_result crossvalidate(Classifier<vector<vector<double> >, bool> *C, vector<pa
     return ret;
 }
 
-run_result single_noise_test(Classifier<vector<vector<double> >, bool> *C, vector<pair<vector<vector<double> >, bool> > &training_set, double noise_mean, double noise_stddev, int num_tests)
+run_result single_noise_test(Classifier<vector<pair<int, vector<double> > >, bool> *C, vector<pair<vector<pair<int, vector<double> > >, bool> > &training_set, double noise_mean, double noise_stddev, int num_tests)
 {
     printf("Performing a noise test, with the following parameters:\n");
     printf("Mean: %.6lf, Standard Deviation: %.6lf, Number of tests: %d\n", noise_mean, noise_stddev, num_tests);
@@ -383,17 +382,18 @@ run_result single_noise_test(Classifier<vector<vector<double> >, bool> *C, vecto
     individual.resize(num_tests);
     for (int t=0;t<num_tests;t++)
     {
-        vector<pair<vector<vector<double> >, bool> > noisy_training_set;
+        vector<pair<vector<pair<int, vector<double> > >, bool> > noisy_training_set;
         noisy_training_set.resize(training_set.size());
         for (uint i=0;i<training_set.size();i++)
         {
             noisy_training_set[i].first.resize(training_set[i].first.size());
             for (uint j=0;j<training_set[i].first.size();j++)
             {
-                noisy_training_set[i].first[j].resize(training_set[i].first[j].size());
-                for (uint k=0;k<training_set[i].first[j].size();k++)
+                noisy_training_set[i].first[j].first = training_set[i].first[j].first;
+                noisy_training_set[i].first[j].second.resize(training_set[i].first[j].second.size());
+                for (uint k=0;k<training_set[i].first[j].second.size();k++)
                 {
-                    noisy_training_set[i].first[j][k] = training_set[i].first[j][k] + noise(generator);
+                    noisy_training_set[i].first[j].second[k] = training_set[i].first[j].second[k] + noise(generator);
                 }
             }
             noisy_training_set[i].second = training_set[i].second;
@@ -415,7 +415,7 @@ run_result single_noise_test(Classifier<vector<vector<double> >, bool> *C, vecto
     return ret;
 }
 
-void noise_test(Classifier<vector<vector<double> >, bool> *C, vector<pair<vector<vector<double> >, bool> > &training_set, double noise_mean_lo, double noise_mean_step, double noise_mean_hi, double noise_stddev_lo, double noise_stddev_step, double noise_stddev_hi, int num_tests)
+void noise_test(Classifier<vector<pair<int, vector<double> > >, bool> *C, vector<pair<vector<pair<int, vector<double> > >, bool> > &training_set, double noise_mean_lo, double noise_mean_step, double noise_mean_hi, double noise_stddev_lo, double noise_stddev_step, double noise_stddev_hi, int num_tests)
 {
     printf("Starting a full noise test, with the following parameters:\n");
     printf("Mean: (%.6lf:%.6lf), step size: %.6lf\n", noise_mean_lo, noise_mean_hi, noise_mean_step);
@@ -445,13 +445,13 @@ void noise_test(Classifier<vector<vector<double> >, bool> *C, vector<pair<vector
     } while (mu <= noise_mean_hi);
 }
 
-vector<pair<vector<vector<double> >, bool> > extract_data(char* filename)
+vector<pair<vector<pair<int, vector<double> > >, bool> > extract_data(char* filename)
 {
     int total;
     int sub_count, type_count;
     char expected_outcome[101];
     
-    vector<pair<vector<vector<double> >, bool> > ret;
+    vector<pair<vector<pair<int, vector<double> > >, bool> > ret;
     
     FILE *f = fopen(filename, "r");
     
@@ -462,15 +462,16 @@ vector<pair<vector<vector<double> >, bool> > extract_data(char* filename)
     
     for (int i=0;i<total;i++)
     {
-        ret[i].first.resize(sub_count);
-        for (int j=0;j<sub_count;j++) ret[i].first[j].resize(type_count);
-        
-        fscanf(f, "%s", expected_outcome);
-        for (int k=0;k<type_count;k++)
+        int curr_size;
+        fscanf(f, "%s%d", expected_outcome, curr_size);
+        ret[i].first.resize(curr_size);
+        for (int j=0;j<curr_size;j++) 
         {
-            for (int j=0;j<sub_count;j++)
+            fscanf(f, "%d", &ret[i].first[j].first);
+            ret[i].first[j].second.resize(type_count);
+            for (int k=0;k<type_count;k++)
             {
-                fscanf(f, "%lf", &ret[i].first[j][k]);
+                fscanf(f, "%lf", &ret[i].first[j].second[k]);
             }
         }
         ret[i].second = (strcmp(expected_outcome, "positive") == 0);
