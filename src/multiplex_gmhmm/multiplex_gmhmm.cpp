@@ -117,14 +117,14 @@ void MultiplexGMHMM::train(vector<vector<pair<int, vector<double> > > > &train_s
     // Train all the layers individually (as before)
     for (int l=0;l<L;l++)
     {
-        vector<pair<int, vector<double> > > curr_set(train_set.size());
+        vector<vector<pair<int, double> > > curr_set(train_set.size());
         for (uint i=0;i<train_set.size();i++)
         {
-            curr_set[i].second.resize(train_set[i].size());
+            curr_set[i].resize(train_set[i].size());
             for (uint j=0;j<train_set[i].size();j++)
             {
-                curr_set[i].first = train_set[i][j].first;
-                curr_set[i].second[j] = train_set[i][j].second[l];
+                curr_set[i][j].first = train_set[i][j].first;
+                curr_set[i][j].second = train_set[i][j].second[l];
             }
         }
         layers[l] -> train(curr_set);
