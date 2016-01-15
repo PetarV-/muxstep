@@ -1,6 +1,7 @@
 #ifndef CLASSIFIER_EVAL
 #define CLASSIFIER_EVAL
 
+#include <tuple>
 #include <vector>
 
 #include <classifier.h>
@@ -37,7 +38,7 @@ run_result single_noise_test(Classifier<std::vector<std::pair<int, std::vector<d
 
 void noise_test(Classifier<std::vector<std::pair<int, std::vector<double> > >, bool> *C, std::vector<std::pair<std::vector<std::pair<int, std::vector<double> > >, bool> > &training_set, double noise_mean_lo, double noise_mean_step, double noise_mean_hi, double noise_stddev_lo, double noise_stddev_step, double noise_stddev_hi, int num_tests = 5);
 
-std::vector<std::pair<std::vector<std::pair<int, std::vector<double> > >, bool> > extract_data(char* filename);
+std::tuple<int, int, std::vector<std::pair<std::vector<std::pair<int, std::vector<double> > >, bool> > > extract_data(char* filename);
 
 void dump_result(run_result &res, bool single_run, char* filename, double noise_mean = 0.0, double noise_stddev = 0.0);
 

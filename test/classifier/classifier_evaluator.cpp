@@ -20,6 +20,7 @@
 #include <chrono>
 #include <random>
 #include <thread>
+#include <tuple>
 
 #include <classifier.h>
 #include <classifier_evaluator.h>
@@ -445,7 +446,7 @@ void noise_test(Classifier<vector<pair<int, vector<double> > >, bool> *C, vector
     } while (mu <= noise_mean_hi);
 }
 
-vector<pair<vector<pair<int, vector<double> > >, bool> > extract_data(char* filename)
+tuple<int, int, vector<pair<vector<pair<int, vector<double> > >, bool> > > extract_data(char* filename)
 {
     int total;
     int sub_count, type_count;
@@ -463,7 +464,7 @@ vector<pair<vector<pair<int, vector<double> > >, bool> > extract_data(char* file
     for (int i=0;i<total;i++)
     {
         int curr_size;
-        fscanf(f, "%s%d", expected_outcome, curr_size);
+        fscanf(f, "%s%d", expected_outcome, &curr_size);
         ret[i].first.resize(curr_size);
         for (int j=0;j<curr_size;j++) 
         {
@@ -479,7 +480,7 @@ vector<pair<vector<pair<int, vector<double> > >, bool> > extract_data(char* file
     
     fclose(f);
     
-    return ret;
+    return make_tuple(sub_count, type_count, ret);
 }
 
 void dump_result(run_result &res, bool single_run, char* filename, double noise_mean, double noise_stddev)

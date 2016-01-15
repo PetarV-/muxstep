@@ -18,7 +18,6 @@
 
 #include <multiplex_gmhmm.h>
 #include <nsga2.h>
-#include <vector_cmp.h>
 
 #define DPRINTC(C) printf(#C " = %c\n", (C))
 #define DPRINTS(S) printf(#S " = %s\n", (S))
@@ -372,7 +371,7 @@ istream& operator>>(istream &in, MultiplexGMHMM *&M)
     double **omega = new double*[L];
     for (int i=0;i<L;i++)
     {
-        this -> omega[i] = new double[L];
+        omega[i] = new double[L];
         for (int j=0;j<L;j++)
         {
             in >> omega[i][j];

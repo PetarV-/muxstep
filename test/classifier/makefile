@@ -1,4 +1,4 @@
-OBJS = ../../build/classifier_evaluator.o ../../build/classifier_multiplex_gmhmm.o ../../build/gmhmm.o ../../build/multiplex_gmhmm.o ../../build/nsga2.o ../../build/phi.o ../../build/vector_cmp.o ../../build/simple_tester.o
+OBJS = ../../build/classifier_evaluator.o ../../build/classifier_multiplex_gmhmm.o ../../build/gmhmm.o ../../build/multiplex_gmhmm.o ../../build/nsga2.o ../../build/phi.o ../../build/simple_tester.o
 CC = clang++ -I../../include
 DEBUG = -g
 CFLAGS = -std=c++11 -O3 -Wall -Wextra -Werror -Weffc++ -Wstrict-aliasing --pedantic -c $(DEBUG)
@@ -25,9 +25,6 @@ simple_tester : $(OBJS)
 
 ../../build/phi.o : 
 	$(MAKE) -C ../../src/gmhmm/ phi
-
-../../build/vector_cmp.o : 
-	$(MAKE) -C ../../src/vector_cmp/ vector_cmp
 
 ../../build/simple_tester.o :
 	$(MKDIR_P) ../../build/
