@@ -64,6 +64,7 @@ int main(int argc, char **argv)
     fscanf(f, "%d%d", &lo, &hi);
     
     uniform_int_distribution<int> length_distribution(lo, hi);
+    uniform_int_distribution<int> sub_distribution(0, sub - 1);
 
     fprintf(g, "%d\n", labels * n);
     fprintf(g, "%d %d\n\n", sub, types);
@@ -99,11 +100,12 @@ int main(int argc, char **argv)
             
             for (int j=0;j<len;j++)
             {
-                data[j].first = j;
+                int curr_sub = sub_distribution(generator);
+                data[j].first = curr_sub;
                 data[j].second.resize(types);
                 for (int t=0;t<types;t++)
                 {
-                    data[j].second[t] = N[t][j](generator);
+                    data[j].second[t] = N[t][curr_sub](generator);
                 }
             }
 
