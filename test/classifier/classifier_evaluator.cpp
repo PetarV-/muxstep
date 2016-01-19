@@ -274,8 +274,7 @@ run_result single_run(Classifier<vector<pair<int, vector<double> > >, bool> *C, 
             thrs.push_back(thread(&parallel_run, C -> clone(), ref(training_set), ref(test_set), ref(ret[i])));
         }
         
-        C = new MultiplexGMHMMClassifier(4, 5, 2);
-        parallel_run(C, training_set, test_set, ret[num_threads - 1]);
+        parallel_run(C -> clone(), training_set, test_set, ret[num_threads - 1]);
         
         for (int i=0;i<num_threads - 1;i++)
         {
