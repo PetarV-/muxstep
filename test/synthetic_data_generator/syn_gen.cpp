@@ -27,7 +27,7 @@ using namespace std;
 typedef long long lld;
 typedef unsigned long long llu;
 
-bool super_awesome_comparator(pair<int, vector<double> > a, pair<int, vector<double> > b)
+bool compare_norm(pair<int, vector<double> > a, pair<int, vector<double> > b)
 {
     double norm_sq_a = 0.0, norm_sq_b = 0.0;
 
@@ -44,9 +44,9 @@ bool super_awesome_comparator(pair<int, vector<double> > a, pair<int, vector<dou
 
 int main(int argc, char **argv)
 {
-    if (argc != 3)
+    if (argc != 4 || (argv[3][0] != 'Y' && argv[3][0] != 'N'))
     {
-        printf("Usage: ./syn_gen <input_parameters> <output_file>\n");
+        printf("Usage: ./syn_gen <input_parameters> <output_file> <sort? [Y/N]>\n");
         return -1;
     }
     
@@ -55,13 +55,18 @@ int main(int argc, char **argv)
     
     FILE *f = fopen(argv[1], "r");
     FILE *g = fopen(argv[2], "w");
+    bool to_sort = (argv[3][0] == 'Y');
     
-    int n, labels, len, types;
+    int n, labels, sub, types;
+    int lo, hi;
+
+    fscanf(f, "%d%d%d%d", &n, &labels, &sub, &types);
+    fscanf(f, "%d%d", &lo, &hi);
     
-    fscanf(f, "%d%d%d%d", &n, &labels, &len, &types);
-    
+    uniform_int_distribution<int> length_distribution(lo, hi);
+
     fprintf(g, "%d\n", labels * n);
-    fprintf(g, "%d %d\n\n", len, types);
+    fprintf(g, "%d %d\n\n", sub, types);
     
     printf("Generating synthetic data...\n");
     
@@ -75,8 +80,8 @@ int main(int argc, char **argv)
         
         for (int t=0;t<types;t++)
         {
-            N[t] = new normal_distribution<double>[len];
-            for (int i=0;i<len;i++)
+            N[t] = new normal_distribution<double>[sub];
+            for (int i=0;i<sub;i++)
             {
                 double mean, stddev;
                 fscanf(f, "%lf%lf", &mean, &stddev);
@@ -86,6 +91,7 @@ int main(int argc, char **argv)
 
         for (int i=0;i<n;i++)
         {
+            int len = length_distribution(generator);
             fprintf(g, "%s %d\n", label, len);
 
             vector<pair<int, vector<double> > > data;
@@ -101,7 +107,7 @@ int main(int argc, char **argv)
                 }
             }
 
-            sort(data.begin(), data.end(), super_awesome_comparator);
+            if (to_sort) sort(data.begin(), data.end(), compare_norm);
 
             for (int j=0;j<len;j++)
             {

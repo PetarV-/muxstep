@@ -348,46 +348,9 @@ void GMHMM::baumwelch(vector<vector<pair<int, double> > > &Ys, int iterations, d
         
         O = nextO;
         
-        printf("%.10lf\n", lhood - oldlhood);
-        
-        if (fabs(lhood - oldlhood) < tolerance)
-        {
-            printf("Converged after %d iterations!\n", iter + 1);
-            break;
-        }
-        
-        if ((iter + 1) % 20 == 0)
-        {
-            printf("Completed %d iterations\n", iter + 1);
-        }
+        if (fabs(lhood - oldlhood) < tolerance) break;
         
         oldlhood = lhood;
-    }
-    
-    printf("Baum-Welch procedure completed.\n");
-    
-    printf("START-STATE VECTOR:\n");
-    for (int i=0;i<n;i++) printf("%lf ", pi[i]);
-    printf("\n");
-    
-    printf("TRANSITION MATRIX:\n");
-    for (int i=0;i<n;i++)
-    {
-        for (int j=0;j<n;j++)
-        {
-            printf("%lf ", T[i][j]);
-        }
-        printf("\n");
-    }
-    
-    printf("OBSERVATION MATRIX\n");
-    for (int i=0;i<n;i++)
-    {
-        for (int j=0;j<obs;j++)
-        {
-            printf("%lf ", O[i][j]);
-        }
-        printf("\n");
     }
 }
 
@@ -445,12 +408,6 @@ void GMHMM::train(vector<vector<pair<int, double> > > &train_set)
     
     delete cnt;
 
-    printf("Mus/Sigmas calculated: \n");
-    for (int i=0;i<obs;i++)
-    {
-        printf("(%lf, %lf)\n", mu[i], sigma[i]);
-    }
-    
     // reset the initial probabilities
     unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
     gen = default_random_engine(seed);

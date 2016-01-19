@@ -207,16 +207,6 @@ void MultiplexGMHMM::train(vector<vector<pair<int, vector<double> > > > &train_s
     
     for (int i=0;i<L;i++) delete[] fin_omega[i];
     delete[] fin_omega;
-    
-    printf("TRANSITION MATRIX:\n");
-    for (int i=0;i<L;i++)
-    {
-        for (int j=0;j<L;j++)
-        {
-            printf("%lf ", omega[i][j]);
-        }
-        printf("\n");
-    }
 }
 
 double MultiplexGMHMM::log_likelihood(vector<pair<int, vector<double> > > &test_data)
@@ -333,8 +323,6 @@ void MultiplexGMHMM::dump_muxviz_data(char *nodes_filename, char *base_layers_fi
     
     fclose(f);
     
-    printf("Node data successfully written to %s.\n", nodes_filename);
-    
     for (int i=0;i<L;i++)
     {
         char curr_lyr_filename[150];
@@ -348,10 +336,7 @@ void MultiplexGMHMM::dump_muxviz_data(char *nodes_filename, char *base_layers_fi
             }
         }
         fclose(g);
-        printf("Layer %d data successfully written to %s.\n", i+1, curr_lyr_filename);
     }
-    
-    printf("Done.\n");
 }
 
 istream& operator>>(istream &in, MultiplexGMHMM *&M)

@@ -393,19 +393,12 @@ vector<chromosome> NSGAII::optimise(nsga2_params &params, vector<function<double
     
     rand_index = uniform_int_distribution<int>(0, pop_size - 1);
     
-    printf("Input successfully read. Initialising...\n");
-    
     initialise();
-    
-    printf("Initialised zeroth generation.\n");
     
     for (int i=0;i<generations;i++)
     {
         iterate();
-        if ((i+1)%20 == 0) printf("Generation %d complete.\n", i+1);
     }
-    
-    printf("Done.\n");
     
     return main_population;
 }
