@@ -51,7 +51,7 @@ MultiplexGMHMMClassifier::~MultiplexGMHMMClassifier()
 
 Classifier<vector<pair<int, vector<double> > >, bool>* MultiplexGMHMMClassifier::clone()
 {
-    return new MultiplexGMHMMClassifier(sub_count, type_count, node_count, positive_model, negative_model);
+    return new MultiplexGMHMMClassifier(node_count, sub_count, type_count, positive_model, negative_model);
 }
 
 void MultiplexGMHMMClassifier::dump_muxviz(char *positive_nodes_filename, char *positive_base_layers_filename, char *negative_nodes_filename, char *negative_base_layers_filename)
