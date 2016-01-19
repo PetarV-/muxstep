@@ -445,7 +445,7 @@ void noise_test(Classifier<vector<pair<int, vector<double> > >, bool> *C, vector
     } while (mu <= noise_mean_hi);
 }
 
-tuple<int, int, vector<pair<vector<pair<int, vector<double> > >, bool> > > extract_data(char* filename)
+tuple<int, int, vector<pair<vector<pair<int, vector<double> > >, bool> > > extract_data(string filename)
 {
     int total;
     int sub_count, type_count;
@@ -453,7 +453,7 @@ tuple<int, int, vector<pair<vector<pair<int, vector<double> > >, bool> > > extra
     
     vector<pair<vector<pair<int, vector<double> > >, bool> > ret;
     
-    FILE *f = fopen(filename, "r");
+    FILE *f = fopen(filename.c_str(), "r");
     
     fscanf(f, "%d", &total);
     fscanf(f, "%d%d", &sub_count, &type_count);
