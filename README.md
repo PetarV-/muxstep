@@ -4,7 +4,7 @@ TODO...
 
 ## Building
 
-You will need clang++ to compile the library (on Mac OS X, this compiler is installed by default).
+You will need `clang++` to compile the library (on Mac OS X, this compiler is installed by default).
 
 Simply run
 
