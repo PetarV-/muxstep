@@ -30,7 +30,7 @@ where `/path/to/muxstep` refers to the (absolute) path to the root repository fo
 
 After doing this, you may run the example using
 
-    $ basic
+    $ ./basic
 
 (Note, it takes some time for training to complete!)
 
