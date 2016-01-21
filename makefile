@@ -15,7 +15,7 @@ static : $(OBJS)
 .PHONY : shared
 shared : $(OBJS)
 	$(MKDIR_P) lib/
-	$(CC) $(SFLAGS) $(LFLAGS) -o lib/libmuxstep.so $(OBJS)
+	$(CC) $(SFLAGS) $(LFLAGS) -o lib/libmuxstep.dyn.so $(OBJS)
 
 build/classifier_multiplex_gmhmm.o :
 	$(MAKE) -C src/classifier/ ../../build/classifier_multiplex_gmhmm.o

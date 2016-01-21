@@ -19,7 +19,6 @@
 #include <fstream>
 
 #include <classifier.h>
-#include <classifier_evaluator.h>
 
 #define DPRINTC(C) printf(#C " = %c\n", (C))
 #define DPRINTS(S) printf(#S " = %s\n", (S))
@@ -31,6 +30,45 @@ using namespace std;
 typedef unsigned int uint;
 typedef long long lld;
 typedef unsigned long long llu;
+
+// This is a helper method to convert the data given by syn_gen into the format
+// expected by the classifier. It also returns the sub-output and type-count for convenience.
+tuple<int, int, vector<pair<vector<pair<int, vector<double> > >, bool> > > extract_data(string filename)
+{
+    int total;
+    int sub_count, type_count;
+    char expected_outcome[101];
+    
+    vector<pair<vector<pair<int, vector<double> > >, bool> > ret;
+    
+    FILE *f = fopen(filename.c_str(), "r");
+    
+    fscanf(f, "%d", &total);
+    fscanf(f, "%d%d", &sub_count, &type_count);
+    
+    ret.resize(total);
+    
+    for (int i=0;i<total;i++)
+    {
+        int curr_size;
+        fscanf(f, "%s%d", expected_outcome, &curr_size);
+        ret[i].first.resize(curr_size);
+        for (int j=0;j<curr_size;j++) 
+        {
+            fscanf(f, "%d", &ret[i].first[j].first);
+            ret[i].first[j].second.resize(type_count);
+            for (int k=0;k<type_count;k++)
+            {
+                fscanf(f, "%lf", &ret[i].first[j].second[k]);
+            }
+        }
+        ret[i].second = (strcmp(expected_outcome, "positive") == 0);
+    }
+    
+    fclose(f);
+    
+    return make_tuple(sub_count, type_count, ret);
+}
 
 int main()
 {
