@@ -32,7 +32,7 @@ run_result stderr_result(std::vector<run_result> &individual, run_result &means)
 
 run_result single_run(Classifier<std::vector<std::pair<int, std::vector<double> > >, bool> *C, std::vector<std::pair<std::vector<std::pair<int, std::vector<double> > >, bool> > &training_set, std::vector<std::pair<std::vector<std::pair<int, std::vector<double> > >, bool> > &test_set, int num_tests = 1, int num_threads = 1);
 
-run_result crossvalidate(Classifier<std::vector<std::pair<int, std::vector<double> > >, bool> *C, std::vector<std::pair<std::vector<std::pair<int, std::vector<double> > >, bool> > &training_set, int fold_cnt = 10);
+run_result crossvalidate(Classifier<std::vector<std::pair<int, std::vector<double> > >, bool> *C, std::vector<std::pair<std::vector<std::pair<int, std::vector<double> > >, bool> > &training_set, int num_tests = 1, int num_threads = 1, int fold_cnt = 10);
 
 run_result single_noise_test(Classifier<std::vector<std::pair<int, std::vector<double> > >, bool> *C, std::vector<std::pair<std::vector<std::pair<int, std::vector<double> > >, bool> > &training_set, double noise_mean, double noise_stddev, int num_tests);
 

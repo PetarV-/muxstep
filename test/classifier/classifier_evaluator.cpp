@@ -289,7 +289,7 @@ run_result single_run(Classifier<vector<pair<int, vector<double> > >, bool> *C, 
     return max_run;
 }
 
-run_result crossvalidate(Classifier<vector<pair<int, vector<double> > >, bool> *C, vector<pair<vector<pair<int, vector<double> > >, bool> > &training_set, int fold_cnt)
+run_result crossvalidate(Classifier<vector<pair<int, vector<double> > >, bool> *C, vector<pair<vector<pair<int, vector<double> > >, bool> > &training_set, int num_tests, int num_threads, int fold_cnt)
 {
     int total = training_set.size();
     int total_positive = 0, total_negative = 0;
@@ -351,7 +351,7 @@ run_result crossvalidate(Classifier<vector<pair<int, vector<double> > >, bool> *
         }
         
         printf("Starting crossvalidation step %d\n", i);
-        individual[i] = single_run(C, curr_train, curr_test, 1);
+        individual[i] = single_run(C, curr_train, curr_test, num_tests, num_threads);
         
         char cur_filename[150];
         sprintf(cur_filename, "results_%02d.out", i);

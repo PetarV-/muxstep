@@ -34,10 +34,24 @@ typedef unsigned long long llu;
 
 int main()
 {
-     MultiplexGMHMMClassifier *C = new MultiplexGMHMMClassifier(4, 4, 2);
-     ifstream in("model.txt");
-     in >> C;
-     in.close();
+    // Get the data set into a required format
+    // (Here using data produced by syn_gen and the provided classifier_evaluator's extract_data method)
+    // (This returns a <sub_count, type_count, data> tuple.
+    auto data_trn = extract_data("syn_train.out");
+
+    // Create a new GMHMM (here, with 4 nodes)
+    MultiplexGMHMMClassifier *C = new MultiplexGMHMMClassifier(4, get<0>(data_trn), get<1>(data_trn));
+
+    // Train the classifier using the data
+    C -> train(get<2>(data_trn));
+ 
+    /*
+     * Alternatively, a pre-trained model can be input from a file, like so:
+     * MultiplexGMHMMClassifier *C;
+     * ifstream in("model.txt");
+     * in >> C;
+     * in.close();
+     */
 
     // Use the trained classifier to make predictions
     // (Here using data produced by syn_gen with the same parameters)
