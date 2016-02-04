@@ -1,4 +1,4 @@
-OBJS = build/classifier_multiplex_gmhmm.o build/gmhmm.o build/multiplex_gmhmm.o build/nsga2.o build/phi.o
+OBJS = build/classifier_multiplex_gmhmm.o build/classifier_k_ary.o build/gmhmm.o build/multiplex_gmhmm.o build/nsga2.o build/phi.o
 CC = clang++ -Iinclude
 LFLAGS = -lpthread -Wall
 SFLAGS = -shared -fPIC
@@ -19,6 +19,9 @@ shared : $(OBJS)
 
 build/classifier_multiplex_gmhmm.o :
 	$(MAKE) -C src/classifier/ ../../build/classifier_multiplex_gmhmm.o
+
+build/classifier_k_ary.o :
+	$(MAKE) -C src/classifier/ ../../build/classifier_k_ary.o
 
 build/gmhmm.o :
 	$(MAKE) -C src/gmhmm/ ../../build/gmhmm.o

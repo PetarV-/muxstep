@@ -17,6 +17,7 @@ public:
     virtual std::vector<double> get_thresholds() = 0; // Needed by the evaluator (for extracting ROC data)
 };
 
+// the standard binary classifier
 class MultiplexGMHMMClassifier : public Classifier<std::vector<std::pair<int, std::vector<double> > >, bool>
 {
 private:
@@ -29,8 +30,8 @@ private:
     std::vector<double> thresholds;
     
 public:
-    MultiplexGMHMMClassifier(int node_count, int sub_count, int type_count); // initialise a random multiplex GMHMM
-    MultiplexGMHMMClassifier(int node_count, int sub_count, int type_count, MultiplexGMHMM *positive, MultiplexGMHMM *negative); // initialise a multiplex GMHMM from parameters 
+    MultiplexGMHMMClassifier(int node_count, int sub_count, int type_count); // initialise a random multiplex GMHMM classifier
+    MultiplexGMHMMClassifier(int node_count, int sub_count, int type_count, MultiplexGMHMM *positive, MultiplexGMHMM *negative); // initialise a multiplex GMHMM classifier from parameters 
     ~MultiplexGMHMMClassifier();
 
     Classifier<std::vector<std::pair<int, std::vector<double> > >, bool>* clone();
@@ -44,6 +45,32 @@ public:
 
     friend std::istream& operator>>(std::istream &in, MultiplexGMHMMClassifier *&C);
     friend std::ostream& operator<<(std::ostream &out, const MultiplexGMHMMClassifier *C);
+};
+
+// Experimental (untested) feature: k-ary classifier
+class MultiplexKClassifier : public Classifier<std::vector<std::pair<int, std::vector<double> > >, int>
+{
+private:
+    int node_count;
+    int sub_count;
+    int type_count;
+    int label_count; // how many labels do we have?
+    std::vector<MultiplexGMHMM*> models;
+
+public:
+    MultiplexKClassifier(int node_count, int sub_count, int type_count, int label_count); // initialise a random k-ary classifier
+    MultiplexKClassifier(int node_count, int sub_count, int type_count, int label_count, std::vector<MultiplexGMHMM*> models); // initialise a k-ary classifier from parameters
+    ~MultiplexKClassifier();
+
+    Classifier<std::vector<std::pair<int, std::vector<double> > >, int>* clone();
+
+    void train(std::vector<std::pair<std::vector<std::pair<int, std::vector<double> > >, int> > &training_set);
+    int classify(std::vector<std::pair<int, std::vector<double> > > &test_data);
+
+    std::vector<double> get_thresholds(); // unnecessary here, returns empty vector
+
+    friend std::istream& operator>>(std::istream &in, MultiplexKClassifier *&C);
+    friend std::ostream& operator<<(std::ostream &out, const MultiplexKClassifier *C);
 };
 
 #endif

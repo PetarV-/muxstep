@@ -7,6 +7,10 @@ MKDIR_P = mkdir -p
 	$(MKDIR_P) ../../build/
 	$(CC) $(CFLAGS) classifier_multiplex_gmhmm.cpp -o ../../build/classifier_multiplex_gmhmm.o
 
+../../build/classifier_k_ary.o : classifier_k_ary.cpp
+	$(MKDIR_P) ../../build/
+	$(CC) $(CFLAGS) classifier_k_ary.cpp -o ../../build/classifier_k_ary.o
+
 .PHONY : clean
 clean :
 	-rm -f ../../build/*.o *~ classifier &> /dev/null
