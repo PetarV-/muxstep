@@ -1,6 +1,6 @@
 # muxstep
 
-TODO...
+muxstep is an open-source C++ multiplex HMM library for making inferences on multiple data types.
 
 ## Building
 
