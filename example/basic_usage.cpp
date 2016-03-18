@@ -118,7 +118,6 @@ pair<nsga2_params, baumwelch_params> extract_parameters(string filename, int typ
         }
         else if (param_key == "bw_max_iter") f >> bw_p.iterations;
         else if (param_key == "bw_tolerance") f >> bw_p.tolerance;
-        else assert(false);
     }
     
     f.close();
