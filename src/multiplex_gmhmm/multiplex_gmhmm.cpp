@@ -233,7 +233,7 @@ double MultiplexGMHMM::log_likelihood(vector<pair<int, vector<double> > > &test_
     for (int i=0;i<L;i++)
     {
         double curr_type_val = test_data[0].second[i];
-        double curr_prob = layers[i] -> get_probability(first_sub, curr_type_val);
+        double curr_prob = layers[i] -> get_D() -> get_probability(first_sub, curr_type_val);
         for (int j=0;j<n;j++)
         {
             double curr_pi = layers[i] -> get_pi(j);
@@ -260,7 +260,7 @@ double MultiplexGMHMM::log_likelihood(vector<pair<int, vector<double> > > &test_
         for (int i=0;i<L;i++)
         {
             double curr_type_val = test_data[t].second[i];
-            double curr_prob = layers[i] -> get_probability(curr_sub, curr_type_val);
+            double curr_prob = layers[i] -> get_D() -> get_probability(curr_sub, curr_type_val);
             
             for (int j=0;j<n;j++)
             {

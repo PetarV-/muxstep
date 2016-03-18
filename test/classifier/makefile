@@ -1,4 +1,4 @@
-OBJS = ../../build/classifier_evaluator.o ../../build/classifier_multiplex_gmhmm.o ../../build/gmhmm.o ../../build/multiplex_gmhmm.o ../../build/nsga2.o ../../build/phi.o ../../build/simple_tester.o
+OBJS = ../../build/classifier_evaluator.o ../../build/classifier_multiplex_gmhmm.o ../../build/gmhmm.o ../../build/multiplex_gmhmm.o ../../build/nsga2.o ../../build/gaussian.o ../../build/simple_tester.o
 CC = clang++ -I../../include
 DEBUG = -g
 CFLAGS = -std=c++11 -O3 -fPIC -Wall -Wextra -Werror -Weffc++ -Wstrict-aliasing --pedantic -c $(DEBUG)
@@ -21,8 +21,8 @@ MKDIR_P = mkdir -p
 ../../build/nsga2.o :
 	$(MAKE) -C ../../src/nsga2/ ../../build/nsga2.o
 
-../../build/phi.o : 
-	$(MAKE) -C ../../src/gmhmm/ ../../build/phi.o
+../../build/gaussian.o : 
+	$(MAKE) -C ../../src/gmhmm/ ../../build/gaussian.o
 
 ../../build/simple_tester.o :
 	$(MKDIR_P) ../../build/

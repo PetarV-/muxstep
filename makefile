@@ -1,4 +1,4 @@
-OBJS = build/classifier_multiplex_gmhmm.o build/classifier_k_ary.o build/gmhmm.o build/multiplex_gmhmm.o build/nsga2.o build/phi.o
+OBJS = build/classifier_multiplex_gmhmm.o build/classifier_k_ary.o build/gmhmm.o build/multiplex_gmhmm.o build/nsga2.o build/gaussian.o
 CC = clang++ -Iinclude
 LFLAGS = -lpthread -Wall
 SFLAGS = -shared -fPIC
@@ -32,8 +32,8 @@ build/multiplex_gmhmm.o :
 build/nsga2.o :
 	$(MAKE) -C src/nsga2 ../../build/nsga2.o
 
-build/phi.o :
-	$(MAKE) -C src/gmhmm ../../build/phi.o
+build/gaussian.o :
+	$(MAKE) -C src/gmhmm ../../build/gaussian.o
 
 .PHONY : clean
 clean :

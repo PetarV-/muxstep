@@ -18,6 +18,8 @@
 #include <chrono>
 #include <random>
 
+#include <distribution.h>
+#include <gaussian.h>
 #include <gmhmm.h>
 
 #define DPRINTC(C) printf(#C " = %c\n", (C))
@@ -83,8 +85,7 @@ GMHMM::GMHMM(int n, int obs) : n(n), obs(obs)
         }
     }
     
-    this -> mu = new double[obs];
-    this -> sigma = new double[obs];
+    this -> d = new Gaussian(obs);
 }
 
 GMHMM::GMHMM(int n, int obs, double *pi, double **T, double **O, double *mu, double *sigma) : n(n), obs(obs)
@@ -112,13 +113,35 @@ GMHMM::GMHMM(int n, int obs, double *pi, double **T, double **O, double *mu, dou
         }
     }
     
-    this -> mu = new double[obs];
-    this -> sigma = new double[obs];
-    for (int i=0;i<obs;i++)
+    this -> d = new Gaussian(obs, mu, sigma);
+}
+
+GMHMM::GMHMM(int n, int obs, double *pi, double **T, double **O, Distribution *d) : n(n), obs(obs)
+{
+    this -> pi = new double[n];
+    for (int i=0;i<n;i++) this -> pi[i] = pi[i];
+    
+    this -> T = new double*[n];
+    for (int i=0;i<n;i++)
     {
-        this -> mu[i] = mu[i];
-        this -> sigma[i] = sigma[i];
+        this -> T[i] = new double[n];
+        for (int j=0;j<n;j++)
+        {
+            this -> T[i][j] = T[i][j];
+        }
     }
+    
+    this -> O = new double*[n];
+    for (int i=0;i<n;i++)
+    {
+        this -> O[i] = new double[obs];
+        for (int j=0;j<obs;j++)
+        {
+            this -> O[i][j] = O[i][j];
+        }
+    }
+    
+    this -> d = d -> clone();
 }
 
 GMHMM::GMHMM(GMHMM *gmhmm) : n(gmhmm -> n), obs(gmhmm -> obs)
@@ -146,13 +169,7 @@ GMHMM::GMHMM(GMHMM *gmhmm) : n(gmhmm -> n), obs(gmhmm -> obs)
         }
     }
     
-    this -> mu = new double[gmhmm -> obs];
-    this -> sigma = new double[gmhmm -> obs];
-    for (int i=0;i<gmhmm->obs;i++)
-    {
-        this -> mu[i] = gmhmm -> mu[i];
-        this -> sigma[i] = gmhmm -> sigma[i];
-    }
+    this -> d = gmhmm -> d -> clone();
 }
 
 GMHMM::~GMHMM()
@@ -167,8 +184,7 @@ GMHMM::~GMHMM()
     delete[] T;
     delete[] O;
     
-    delete[] mu;
-    delete[] sigma;
+    delete d;
 }
 
 tuple<double**, double*, double> GMHMM::forward(vector<pair<int, double> > &Y)
@@ -185,7 +201,7 @@ tuple<double**, double*, double> GMHMM::forward(vector<pair<int, double> > &Y)
     double sum = 0.0;
     for (int i=0;i<n;i++)
     {
-        alpha[0][i] = pi[i] * O[i][Y[0].first] * get_probability(Y[0].first, Y[0].second);
+        alpha[0][i] = pi[i] * O[i][Y[0].first] * d -> get_probability(Y[0].first, Y[0].second);
         sum += alpha[0][i];
     }
     c[0] = 1.0 / sum;
@@ -204,7 +220,7 @@ tuple<double**, double*, double> GMHMM::forward(vector<pair<int, double> > &Y)
             {
                 alpha[t][i] += alpha[t-1][j] * T[j][i];
             }
-            alpha[t][i] *= O[i][Y[t].first] * get_probability(Y[t].first, Y[t].second);
+            alpha[t][i] *= O[i][Y[t].first] * d -> get_probability(Y[t].first, Y[t].second);
             sum += alpha[t][i];
         }
         
@@ -239,7 +255,7 @@ double** GMHMM::backward(vector<pair<int, double> > &Y, double *c)
             beta[t][i] = 0.0;
             for (int j=0;j<n;j++)
             {
-                beta[t][i] += T[i][j] * O[j][Y[t+1].first] * get_probability(Y[t+1].first, Y[t+1].second) * beta[t+1][j];
+                beta[t][i] += T[i][j] * O[j][Y[t+1].first] * d -> get_probability(Y[t+1].first, Y[t+1].second) * beta[t+1][j];
             }
             beta[t][i] *= c[t+1];
         }
@@ -308,7 +324,7 @@ void GMHMM::baumwelch(vector<vector<pair<int, double> > > &Ys, int iterations, d
                 {
                     for (uint t=0;t<Ys[l].size()-1;t++)
                     {
-                        PP += alpha[l][t][i] * O[j][Ys[l][t+1].first] * get_probability(Ys[l][t+1].first, Ys[l][t+1].second) * beta[l][t+1][j] * c[l][t+1];
+                        PP += alpha[l][t][i] * O[j][Ys[l][t+1].first] * d -> get_probability(Ys[l][t+1].first, Ys[l][t+1].second) * beta[l][t+1][j] * c[l][t+1];
                     }
                 }
                 T[i][j] *= PP / QQ;
@@ -369,44 +385,15 @@ double GMHMM::get_O(int x, int y)
     return this -> O[x][y];
 }
 
-double GMHMM::get_probability(int obs_id, double x)
+Distribution* GMHMM::get_D()
 {
-    return gaussian_pdf(x, mu[obs_id], sigma[obs_id]);
+    return this -> d;
 }
 
 void GMHMM::train(vector<vector<pair<int, double> > > &train_set)
 {
-    int *cnt = new int[obs];
-    // get means and std. deviations
-    for (int i=0;i<obs;i++)
-    {
-        mu[i] = 0.0;
-        sigma[i] = 0.0;
-        cnt[i] = 0;
-    }
-    
-    for (uint i=0;i<train_set.size();i++)
-    {
-        for (uint j=0;j<train_set[i].size();j++)
-        {
-            mu[train_set[i][j].first] += train_set[i][j].second;
-            cnt[train_set[i][j].first]++;
-        }
-    }
-    
-    for (int i=0;i<obs;i++) mu[i] /= cnt[i];
-    
-    for (uint i=0;i<train_set.size();i++)
-    {
-        for (uint j=0;j<train_set[i].size();j++)
-        {
-            sigma[train_set[i][j].first] += (train_set[i][j].second - mu[train_set[i][j].first]) * (train_set[i][j].second - mu[train_set[i][j].first]);
-        }
-    }
-    
-    for (int i=0;i<obs;i++) sigma[i] = sqrt(sigma[i] / (cnt[i] - 1));
-    
-    delete cnt;
+    // train the distribution parameters
+    d -> train(train_set);
 
     // reset the initial probabilities
     unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
@@ -503,15 +490,18 @@ istream& operator>>(istream &in, GMHMM *&G)
             in >> O[i][j];
         }
     }
-
-    double *mu = new double[obs];
-    double *sigma = new double[obs];
-    for (int i=0;i<obs;i++)
+    
+    Distribution *d;
+    if (G == NULL) d = new Gaussian(obs);
+    else
     {
-        in >> mu[i] >> sigma[i];
+        d = G -> d;
+        delete G;
     }
+    
+    d -> read(in);
 
-    G = new GMHMM(n, obs, pi, T, O, mu, sigma);
+    G = new GMHMM(n, obs, pi, T, O, d);
 
     return in;
 }
@@ -544,10 +534,7 @@ ostream& operator<<(ostream &out, const GMHMM *G)
         out << endl;
     }
 
-    for (int i=0;i<G->obs;i++)
-    {
-        out << G -> mu[i] << " " << G -> sigma[i] << endl;
-    }
+    G -> d -> write(out);
 
     return out;
 }

@@ -7,9 +7,9 @@ MKDIR_P = mkdir -p
 	$(MKDIR_P) ../../build/
 	$(CC) $(CFLAGS) gmhmm.cpp -o ../../build/gmhmm.o
 
-../../build/phi.o : phi.cpp
+../../build/gaussian.o : gaussian.cpp
 	$(MKDIR_P) ../../build/
-	$(CC) $(CFLAGS) phi.cpp -o ../../build/phi.o
+	$(CC) $(CFLAGS) gaussian.cpp -o ../../build/gaussian.o
 
 .PHONY : clean
 clean :
