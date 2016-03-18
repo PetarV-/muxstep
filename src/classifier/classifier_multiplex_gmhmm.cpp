@@ -115,6 +115,14 @@ bool MultiplexGMHMMClassifier::classify(vector<pair<int, vector<double> > > &tes
     return (lhood1 > lhood0);
 }
 
+pair<bool, bool> MultiplexGMHMMClassifier::classify_reliable(vector<pair<int, vector<double> > > &test_data, double min_margin)
+{
+    double lhood1 = positive_model -> log_likelihood(test_data);
+    double lhood0 = negative_model -> log_likelihood(test_data);
+    
+    return make_pair((lhood1 > lhood0), (fabs(lhood1 - lhood0) > min_margin));
+}
+
 vector<double> MultiplexGMHMMClassifier::get_thresholds()
 {
     return thresholds;

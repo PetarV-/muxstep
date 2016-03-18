@@ -97,12 +97,21 @@ int main()
     int total_correct = 0, total = 0;
     for (auto it = data_tst.begin(); it != data_tst.end(); it++)
     {
-        bool prediction = C -> classify(it -> first);
+        // Classify, and report if the margin between the two classes' probabilities is smaller than 0.1
+        pair<bool, bool> prediction = C -> classify_reliable(it -> first, 1e-1);
+        
+        /*
+         * If recording reliability of results is not important, can just call the basic classify method:
+         * bool prediction = C -> classify(it -> first);
+         */
+        
         bool expected = it -> second;
-        cout << "Predicted class is: " << (prediction ? "positive" : "negative") << ". ";
-        cout << ((prediction == expected) ? "Correct!" : "Incorrect!") << endl;
+        cout << "Predicted class is: " << (prediction.first ? "positive" : "negative") << ". ";
+        cout << ((prediction.first == expected) ? "Correct!" : "Incorrect!") << endl;
+        cout << "This prediction is " << (prediction.second ? "reliable." : "unreliable!") << endl;
+        cout << "----------------------------------------------" << endl;
         total++; 
-        if (prediction == expected) total_correct++;
+        if (prediction.first == expected) total_correct++;
     }
 
     double accuracy = (total_correct * 1.0) / (total * 1.0);

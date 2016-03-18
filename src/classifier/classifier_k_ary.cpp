@@ -107,6 +107,39 @@ int MultiplexKClassifier::classify(vector<pair<int, vector<double> > > &test_dat
     return best;
 }
 
+pair<int, bool> MultiplexKClassifier::classify_reliable(vector<pair<int, vector<double> > > &test_data, double min_margin)
+{
+    if (label_count == 1) return make_pair(0, true);
+        
+    double max_lhood = models[0] -> log_likelihood(test_data);
+    double max_lhood2 = models[1] -> log_likelihood(test_data);
+    
+    int best = 0;
+    
+    if (max_lhood < max_lhood2)
+    {
+        swap(max_lhood, max_lhood2);
+        best = 1;
+    }
+    
+    for (int i=2;i<label_count;i++)
+    {
+        double curr_lhood = models[i] -> log_likelihood(test_data);
+        if (curr_lhood > max_lhood)
+        {
+            max_lhood2 = max_lhood;
+            max_lhood = curr_lhood;
+            best = i;
+        }
+        else if (curr_lhood > max_lhood2)
+        {
+            max_lhood2 = curr_lhood;
+        }
+    }
+    
+    return make_pair(best, (fabs(max_lhood - max_lhood2) > min_margin));
+}
+
 vector<double> MultiplexKClassifier::get_thresholds()
 {
     return vector<double>();

@@ -1,3 +1,8 @@
+/*
+ Petar 'PetarV' Velickovic
+ Data Structure: Multiplex GMHMM Classifier
+*/
+
 #ifndef CLASSIFIER
 #define CLASSIFIER
 
@@ -40,6 +45,7 @@ public:
 
     void train(std::vector<std::pair<std::vector<std::pair<int, std::vector<double> > >, bool> > &training_set);
     bool classify(std::vector<std::pair<int, std::vector<double> > > &test_data);
+    std::pair<bool, bool> classify_reliable(std::vector<std::pair<int, std::vector<double> > > &test_data, double min_margin);
     
     std::vector<double> get_thresholds();
 
@@ -66,6 +72,7 @@ public:
 
     void train(std::vector<std::pair<std::vector<std::pair<int, std::vector<double> > >, int> > &training_set);
     int classify(std::vector<std::pair<int, std::vector<double> > > &test_data);
+    std::pair<int, bool> classify_reliable(std::vector<std::pair<int, std::vector<double> > > &test_data, double min_margin);
 
     std::vector<double> get_thresholds(); // unnecessary here, returns empty vector
 
