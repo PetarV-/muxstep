@@ -40,6 +40,10 @@ struct nsga2_params
     std::vector<std::pair<double, double> > var_lims;
 };
 
+
+std::istream& operator>>(std::istream &in, nsga2_params &nsga_p);
+std::ostream& operator<<(std::ostream &out, const nsga2_params nsga_p);
+
 class NSGAII
 {
 private:

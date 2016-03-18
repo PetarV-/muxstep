@@ -19,6 +19,8 @@
 #include <fstream>
 
 #include <classifier.h>
+#include <gmhmm.h>
+#include <nsga2.h>
 
 #define DPRINTC(C) printf(#C " = %c\n", (C))
 #define DPRINTS(S) printf(#S " = %s\n", (S))
@@ -70,17 +72,74 @@ tuple<int, int, vector<pair<vector<pair<int, vector<double> > >, bool> > > extra
     return make_tuple(sub_count, type_count, ret);
 }
 
+// This is a helper method to extract training parameters from a file in a specific format
+// This file is expected to have a single key-value pair in each line (see training_params.in for example)
+// If a key is unobserved, a default value will be used
+pair<nsga2_params, baumwelch_params> extract_parameters(string filename, int type_count)
+{
+    // Fill up the params with default values
+    nsga2_params nsga_p;
+    nsga_p.pop_size = 100;
+    nsga_p.ft_size = type_count * type_count;
+    nsga_p.generations = 250;
+    nsga_p.p_crossover = 0.9;
+    nsga_p.p_mutation = 1.0 / nsga_p.ft_size;
+    nsga_p.di_crossover = 20.0;
+    nsga_p.di_mutation = 20.0;
+    nsga_p.var_lims.resize(nsga_p.ft_size);
+    for (int i=0;i<nsga_p.ft_size;i++)
+    {
+        nsga_p.var_lims[i] = make_pair(1e-6, 1.0);
+    }
+    
+    baumwelch_params bw_p;
+    bw_p.iterations = 10000000;
+    bw_p.tolerance = 1e-7;
+    
+    ifstream f(filename);
+    
+    string param_key;
+    
+    // Scan through the file, updating params as we go
+    while (f >> param_key)
+    {
+        if (param_key == "nsga_pop_size") f >> nsga_p.pop_size;
+        else if (param_key == "nsga_generations") f >> nsga_p.generations;
+        else if (param_key == "nsga_p_crossover") f >> nsga_p.p_crossover;
+        else if (param_key == "nsga_p_mutation") f >> nsga_p.p_mutation;
+        else if (param_key == "nsga_di_crossover") f >> nsga_p.di_crossover;
+        else if (param_key == "nsga_di_mutation") f >> nsga_p.di_mutation;
+        else if (param_key == "nsga_var_lims")
+        {
+            int pos;
+            double lo, hi;
+            f >> pos >> lo >> hi;
+            nsga_p.var_lims[pos] = make_pair(lo, hi);
+        }
+        else if (param_key == "bw_max_iter") f >> bw_p.iterations;
+        else if (param_key == "bw_tolerance") f >> bw_p.tolerance;
+        else assert(false);
+    }
+    
+    f.close();
+    
+    return make_pair(nsga_p, bw_p);
+}
+
 int main()
 {
     // Get the data set into a required format
     // (Here using data produced by syn_gen and the provided classifier_evaluator's extract_data method)
     // (This returns a <sub_count, type_count, data> tuple.
     auto data_trn = extract_data("syn_train.out");
+    
+    // Read the parameters file
+    auto params = extract_parameters("training_params.in", get<1>(data_trn));
 
-    // Create a new GMHMM (here, with 4 nodes)
-    MultiplexGMHMMClassifier *C = new MultiplexGMHMMClassifier(4, get<0>(data_trn), get<1>(data_trn));
+    // Create a new Multiplex GMHMM Classifier (here, with 4 nodes) using the extracted parameters
+    MultiplexGMHMMClassifier *C = new MultiplexGMHMMClassifier(4, get<0>(data_trn), get<1>(data_trn), params.first, params.second);
 
-    // Train the classifier using the data
+    // Train the classifier using the extracted data
     C -> train(get<2>(data_trn));
  
     /*

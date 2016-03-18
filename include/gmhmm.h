@@ -12,6 +12,15 @@
 
 #include <distribution.h>
 
+struct baumwelch_params
+{
+    int iterations;
+    double tolerance;
+};
+
+std::istream& operator>>(std::istream &in, baumwelch_params &bw_p);
+std::ostream& operator<<(std::ostream &out, const baumwelch_params bw_p);
+
 class GMHMM
 {
 private:
@@ -37,7 +46,7 @@ public:
     double get_O(int x, int y);
     Distribution* get_D();
 
-    void train(std::vector<std::vector<std::pair<int, double> > > &train_set);
+    void train(std::vector<std::vector<std::pair<int, double> > > &train_set, baumwelch_params &params);
     double log_likelihood(std::vector<std::pair<int, double> > &test_data);
 
     friend std::istream& operator>>(std::istream &in, GMHMM *&G);

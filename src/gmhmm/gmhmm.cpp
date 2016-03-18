@@ -36,6 +36,18 @@ typedef unsigned long long llu;
 default_random_engine gen;
 uniform_real_distribution<double> rnd_real(0.0, 1.0);
 
+istream& operator>>(istream &in, baumwelch_params &bw_p)
+{
+    in >> bw_p.iterations >> bw_p.tolerance;
+    return in;
+}
+
+ostream& operator<<(ostream &out, const baumwelch_params bw_p)
+{
+    out << bw_p.iterations << " " << bw_p.tolerance << endl;
+    return out;
+}
+
 GMHMM::GMHMM(int n, int obs) : n(n), obs(obs)
 {
     unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
@@ -390,7 +402,7 @@ Distribution* GMHMM::get_D()
     return this -> d;
 }
 
-void GMHMM::train(vector<vector<pair<int, double> > > &train_set)
+void GMHMM::train(vector<vector<pair<int, double> > > &train_set, baumwelch_params &params)
 {
     // train the distribution parameters
     d -> train(train_set);
@@ -439,7 +451,7 @@ void GMHMM::train(vector<vector<pair<int, double> > > &train_set)
     }
     
     // now run the Baum-Welch algorithm
-    baumwelch(train_set, 10000000, 1e-7);
+    baumwelch(train_set, params.iterations, params.tolerance);
 }
 
 double GMHMM::log_likelihood(vector<pair<int, double> > &test_data)

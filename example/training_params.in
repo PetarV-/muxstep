@@ -1,0 +1,12 @@
+nsga_pop_size 100
+nsga_generations 250
+nsga_p_crossover 0.9
+nsga_p_mutation 0.25
+nsga_di_crossover 20.0
+nsga_di_mutation 20.0
+nsga_var_lims 0 1e-6 1.0
+nsga_var_lims 1 1e-6 1.0
+nsga_var_lims 2 1e-6 1.0
+nsga_var_lims 3 1e-6 1.0
+bw_max_iter 10000000
+bw_tolerance 1e-7

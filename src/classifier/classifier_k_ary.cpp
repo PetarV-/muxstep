@@ -29,7 +29,7 @@ typedef unsigned int uint;
 typedef long long lld;
 typedef unsigned long long llu;
 
-MultiplexKClassifier::MultiplexKClassifier(int node_count, int sub_count, int type_count, int label_count) : node_count(node_count), sub_count(sub_count), type_count(type_count), label_count(label_count)
+MultiplexKClassifier::MultiplexKClassifier(int node_count, int sub_count, int type_count, int label_count, nsga2_params nsga_p, baumwelch_params bw_p) : node_count(node_count), sub_count(sub_count), type_count(type_count), label_count(label_count), nsga_p(nsga_p), bw_p(bw_p)
 {
     models.resize(label_count);
     for (int i=0;i<label_count;i++)
@@ -38,7 +38,7 @@ MultiplexKClassifier::MultiplexKClassifier(int node_count, int sub_count, int ty
     }
 }
 
-MultiplexKClassifier::MultiplexKClassifier(int node_count, int sub_count, int type_count, int label_count, vector<MultiplexGMHMM*> models) : node_count(node_count), sub_count(sub_count), type_count(type_count), label_count(label_count)
+MultiplexKClassifier::MultiplexKClassifier(int node_count, int sub_count, int type_count, int label_count, nsga2_params nsga_p, baumwelch_params bw_p, vector<MultiplexGMHMM*> models) : node_count(node_count), sub_count(sub_count), type_count(type_count), label_count(label_count), nsga_p(nsga_p), bw_p(bw_p)
 {
     this -> models.resize(label_count);
     for (int i=0;i<label_count;i++)
@@ -57,7 +57,7 @@ MultiplexKClassifier::~MultiplexKClassifier()
 
 Classifier<vector<pair<int, vector<double> > >, int>* MultiplexKClassifier::clone()
 {
-    return new MultiplexKClassifier(node_count, sub_count, type_count, label_count, models);
+    return new MultiplexKClassifier(node_count, sub_count, type_count, label_count, nsga_p, bw_p, models);
 }
 
 void MultiplexKClassifier::train(vector<pair<vector<pair<int, vector<double> > >, int> > &training_set)
@@ -86,7 +86,7 @@ void MultiplexKClassifier::train(vector<pair<vector<pair<int, vector<double> > >
 
     for (int i=0;i<label_count;i++)
     {
-        models[i] -> train(train[i]);
+        models[i] -> train(train[i], nsga_p, bw_p);
     }
 }
 
@@ -151,6 +151,12 @@ istream& operator>>(istream& in, MultiplexKClassifier *&C)
     
     int node_count, sub_count, type_count, label_count;
     in >> node_count >> sub_count >> type_count >> label_count;
+    
+    nsga2_params nsga_p;
+    in >> nsga_p;
+    
+    baumwelch_params bw_p;
+    in >> bw_p;
 
     vector<MultiplexGMHMM*> models;
     models.resize(label_count);
@@ -160,7 +166,7 @@ istream& operator>>(istream& in, MultiplexKClassifier *&C)
         in >> models[i];
     }
 
-    C = new MultiplexKClassifier(node_count, sub_count, type_count, label_count, models);
+    C = new MultiplexKClassifier(node_count, sub_count, type_count, label_count, nsga_p, bw_p, models);
 
     return in;
 }
@@ -168,6 +174,9 @@ istream& operator>>(istream& in, MultiplexKClassifier *&C)
 ostream& operator<<(ostream &out, const MultiplexKClassifier *C)
 {
     out << C -> node_count << " " << C -> sub_count << " " << C -> type_count << " " << C -> label_count << endl;
+    
+    out << C -> nsga_p;
+    out << C -> bw_p;
     
     for (int i=0;i<C -> label_count;i++)
     {

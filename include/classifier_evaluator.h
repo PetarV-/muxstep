@@ -5,6 +5,8 @@
 #include <vector>
 
 #include <classifier.h>
+#include <gmhmm.h>
+#include <nsga2.h>
 
 struct run_result
 {
@@ -39,6 +41,9 @@ run_result single_noise_test(Classifier<std::vector<std::pair<int, std::vector<d
 void noise_test(Classifier<std::vector<std::pair<int, std::vector<double> > >, bool> *C, std::vector<std::pair<std::vector<std::pair<int, std::vector<double> > >, bool> > &training_set, double noise_mean_lo, double noise_mean_step, double noise_mean_hi, double noise_stddev_lo, double noise_stddev_step, double noise_stddev_hi, int num_tests = 5);
 
 std::tuple<int, int, std::vector<std::pair<std::vector<std::pair<int, std::vector<double> > >, bool> > > extract_data(std::string filename);
+
+std::pair<nsga2_params, baumwelch_params> extract_parameters(std::string filename, int type_count);
+
 
 void dump_result(run_result &res, bool single_run, char* filename, double noise_mean = 0.0, double noise_stddev = 0.0);
 

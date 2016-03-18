@@ -16,7 +16,9 @@
 #include <complex>
 
 #include <classifier.h>
+#include <gmhmm.h>
 #include <multiplex_gmhmm.h>
+#include <nsga2.h>
 
 #define DPRINTC(C) printf(#C " = %c\n", (C))
 #define DPRINTS(S) printf(#S " = %s\n", (S))
@@ -29,14 +31,14 @@ typedef unsigned int uint;
 typedef long long lld;
 typedef unsigned long long llu;
 
-MultiplexGMHMMClassifier::MultiplexGMHMMClassifier(int node_count, int sub_count, int type_count) : node_count(node_count), sub_count(sub_count), type_count(type_count)
+MultiplexGMHMMClassifier::MultiplexGMHMMClassifier(int node_count, int sub_count, int type_count, nsga2_params nsga_p, baumwelch_params bw_p) : node_count(node_count), sub_count(sub_count), type_count(type_count), nsga_p(nsga_p), bw_p(bw_p)
 {
     positive_model = new MultiplexGMHMM(node_count, sub_count, type_count);
     negative_model = new MultiplexGMHMM(node_count, sub_count, type_count);
     thresholds.clear();
 }
 
-MultiplexGMHMMClassifier::MultiplexGMHMMClassifier(int node_count, int sub_count, int type_count, MultiplexGMHMM *positive, MultiplexGMHMM *negative) : node_count(node_count), sub_count(sub_count), type_count(type_count)
+MultiplexGMHMMClassifier::MultiplexGMHMMClassifier(int node_count, int sub_count, int type_count, nsga2_params nsga_p, baumwelch_params bw_p, MultiplexGMHMM *positive, MultiplexGMHMM *negative) : node_count(node_count), sub_count(sub_count), type_count(type_count), nsga_p(nsga_p), bw_p(bw_p)
 {
     positive_model = new MultiplexGMHMM(positive);
     negative_model = new MultiplexGMHMM(negative);
@@ -51,7 +53,7 @@ MultiplexGMHMMClassifier::~MultiplexGMHMMClassifier()
 
 Classifier<vector<pair<int, vector<double> > >, bool>* MultiplexGMHMMClassifier::clone()
 {
-    return new MultiplexGMHMMClassifier(node_count, sub_count, type_count, positive_model, negative_model);
+    return new MultiplexGMHMMClassifier(node_count, sub_count, type_count, nsga_p, bw_p, positive_model, negative_model);
 }
 
 void MultiplexGMHMMClassifier::dump_muxviz(char *positive_nodes_filename, char *positive_base_layers_filename, char *negative_nodes_filename, char *negative_base_layers_filename)
@@ -99,8 +101,8 @@ void MultiplexGMHMMClassifier::train(vector<pair<vector<pair<int, vector<double>
         }
     }
     
-    positive_model -> train(train_positive);
-    negative_model -> train(train_negative);
+    positive_model -> train(train_positive, nsga_p, bw_p);
+    negative_model -> train(train_negative, nsga_p, bw_p);
     
     thresholds.clear();
 }
@@ -135,12 +137,18 @@ istream& operator>>(istream& in, MultiplexGMHMMClassifier *&C)
     int node_count, sub_count, type_count;
     in >> node_count >> sub_count >> type_count;
 
+    nsga2_params nsga_p;
+    in >> nsga_p;
+    
+    baumwelch_params bw_p;
+    in >> bw_p;
+    
     MultiplexGMHMM *positive_model;
     MultiplexGMHMM *negative_model;
     in >> positive_model;
     in >> negative_model;
 
-    C = new MultiplexGMHMMClassifier(node_count, sub_count, type_count, positive_model, negative_model);
+    C = new MultiplexGMHMMClassifier(node_count, sub_count, type_count, nsga_p, bw_p, positive_model, negative_model);
 
     return in;
 }
@@ -148,6 +156,9 @@ istream& operator>>(istream& in, MultiplexGMHMMClassifier *&C)
 ostream& operator<<(ostream &out, const MultiplexGMHMMClassifier *C)
 {
     out << C -> node_count << " " << C -> sub_count << " " << C -> type_count << endl;
+    
+    out << C -> nsga_p;
+    out << C -> bw_p;
     
     out << C -> positive_model;
     out << C -> negative_model;

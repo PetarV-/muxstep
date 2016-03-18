@@ -21,9 +21,12 @@
 #include <random>
 #include <thread>
 #include <tuple>
+#include <fstream>
 
 #include <classifier.h>
 #include <classifier_evaluator.h>
+#include <gmhmm.h>
+#include <nsga2.h>
 
 #define DPRINTC(C) printf(#C " = %c\n", (C))
 #define DPRINTS(S) printf(#S " = %s\n", (S))
@@ -480,6 +483,57 @@ tuple<int, int, vector<pair<vector<pair<int, vector<double> > >, bool> > > extra
     fclose(f);
     
     return make_tuple(sub_count, type_count, ret);
+}
+
+pair<nsga2_params, baumwelch_params> extract_parameters(string filename, int type_count)
+{
+    // Fill up the params with default values
+    nsga2_params nsga_p;
+    nsga_p.pop_size = 100;
+    nsga_p.ft_size = type_count * type_count;
+    nsga_p.generations = 250;
+    nsga_p.p_crossover = 0.9;
+    nsga_p.p_mutation = 1.0 / nsga_p.ft_size;
+    nsga_p.di_crossover = 20.0;
+    nsga_p.di_mutation = 20.0;
+    nsga_p.var_lims.resize(nsga_p.ft_size);
+    for (int i=0;i<nsga_p.ft_size;i++)
+    {
+        nsga_p.var_lims[i] = make_pair(1e-6, 1.0);
+    }
+    
+    baumwelch_params bw_p;
+    bw_p.iterations = 10000000;
+    bw_p.tolerance = 1e-7;
+    
+    ifstream f(filename);
+    
+    string param_key;
+    
+    // Scan through the file, updating params as we go
+    while (f >> param_key)
+    {
+        if (param_key == "nsga_pop_size") f >> nsga_p.pop_size;
+        else if (param_key == "nsga_generations") f >> nsga_p.generations;
+        else if (param_key == "nsga_p_crossover") f >> nsga_p.p_crossover;
+        else if (param_key == "nsga_p_mutation") f >> nsga_p.p_mutation;
+        else if (param_key == "nsga_di_crossover") f >> nsga_p.di_crossover;
+        else if (param_key == "nsga_di_mutation") f >> nsga_p.di_mutation;
+        else if (param_key == "nsga_var_lims")
+        {
+            int pos;
+            double lo, hi;
+            f >> pos >> lo >> hi;
+            nsga_p.var_lims[pos] = make_pair(lo, hi);
+        }
+        else if (param_key == "bw_max_iter") f >> bw_p.iterations;
+        else if (param_key == "bw_tolerance") f >> bw_p.tolerance;
+        else assert(false);
+    }
+    
+    f.close();
+    
+    return make_pair(nsga_p, bw_p);
 }
 
 void dump_result(run_result &res, bool single_run, char* filename, double noise_mean, double noise_stddev)

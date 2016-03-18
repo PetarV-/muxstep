@@ -33,6 +33,35 @@ typedef unsigned int uint;
 typedef long long lld;
 typedef unsigned long long llu;
 
+istream& operator>>(istream& in, nsga2_params &nsga_p)
+{
+    in >> nsga_p.pop_size >> nsga_p.ft_size >> nsga_p.obj_size >> nsga_p.generations;
+    in >> nsga_p.p_crossover >> nsga_p.p_mutation;
+    in >> nsga_p.di_crossover >> nsga_p.di_mutation;
+    nsga_p.var_lims.resize(nsga_p.ft_size);
+    for (int i=0;i<nsga_p.ft_size;i++)
+    {
+        double x, y;
+        in >> x >> y;
+        nsga_p.var_lims[i] = make_pair(x, y);
+    }
+    
+    return in;
+}
+
+ostream& operator<<(ostream &out, const nsga2_params nsga_p)
+{
+    out << nsga_p.pop_size << " " << nsga_p.ft_size << " " << nsga_p.obj_size << " " << nsga_p.generations << endl;
+    out << nsga_p.p_crossover << " " << nsga_p.p_mutation << endl;
+    out << nsga_p.di_crossover << " " << nsga_p.di_mutation << endl;
+    for (int i=0;i<nsga_p.ft_size;i++)
+    {
+        out << nsga_p.var_lims[i].first << " " << nsga_p.var_lims[i].second << endl;
+    }
+    
+    return out;
+}
+
 bool NSGAII::cmp_by_key(const chromosome &X, const chromosome &Y)
 {
     return (X.values[X.sort_key] < Y.values[Y.sort_key]);

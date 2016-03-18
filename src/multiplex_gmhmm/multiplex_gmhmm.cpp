@@ -111,7 +111,7 @@ void MultiplexGMHMM::set_omega(double **omega)
     }
 }
 
-void MultiplexGMHMM::train(vector<vector<pair<int, vector<double> > > > &train_set)
+void MultiplexGMHMM::train(vector<vector<pair<int, vector<double> > > > &train_set, nsga2_params &nsga_p, baumwelch_params &bw_p)
 {
     // Train all the layers individually (as before)
     for (int l=0;l<L;l++)
@@ -126,7 +126,7 @@ void MultiplexGMHMM::train(vector<vector<pair<int, vector<double> > > > &train_s
                 curr_set[i][j].second = train_set[i][j].second[l];
             }
         }
-        layers[l] -> train(curr_set);
+        layers[l] -> train(curr_set, bw_p);
     }
     
     // Define the lambdas that calculate likelihoods for a given omega
@@ -154,25 +154,13 @@ void MultiplexGMHMM::train(vector<vector<pair<int, vector<double> > > > &train_s
         };
     }
     
-    // Prepare the input parameters for NSGA-II
-    nsga2_params params;
-    params.pop_size = 100;
-    params.ft_size = L * L;
-    params.obj_size = train_set.size();
-    params.generations = 250;
-    params.p_crossover = 0.9;
-    params.p_mutation = 1.0 / params.ft_size;
-    params.di_crossover = 20.0;
-    params.di_mutation = 20.0;
-    params.var_lims.resize(params.ft_size);
-    for (int i=0;i<params.ft_size;i++)
-    {
-        params.var_lims[i] = make_pair(1e-6, 1.0);
-    }
+    // These NSGA-II parameters are model/training set dependent and have to be fixed here
+    nsga_p.ft_size = L * L;
+    nsga_p.obj_size = train_set.size();
     
-    // Run the algorithm
+    // Run the NSGA-II algorithm
     NSGAII nsga2;
-    vector<chromosome> candidates = nsga2.optimise(params, objectives);
+    vector<chromosome> candidates = nsga2.optimise(nsga_p, objectives);
     
     // Evaluate the best choice of omega
     int best = -1;

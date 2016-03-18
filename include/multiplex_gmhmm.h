@@ -11,6 +11,7 @@
 #include <vector>
 
 #include <gmhmm.h>
+#include <nsga2.h>
 
 class MultiplexGMHMM
 {
@@ -29,7 +30,7 @@ public:
     ~MultiplexGMHMM();
 
     void set_omega(double **omega);
-    void train(std::vector<std::vector<std::pair<int, std::vector<double> > > > &train_set);
+    void train(std::vector<std::vector<std::pair<int, std::vector<double> > > > &train_set, nsga2_params &nsga_p, baumwelch_params &bw_p);
     double log_likelihood(std::vector<std::pair<int, std::vector<double> > > &test_data);
     
     void dump_muxviz_data(char *nodes_filename, char *base_layers_filename);

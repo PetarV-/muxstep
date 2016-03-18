@@ -9,7 +9,9 @@
 #include <iostream>
 #include <vector>
 
+#include <gmhmm.h>
 #include <multiplex_gmhmm.h>
+#include <nsga2.h>
 
 template<typename Data, typename Label>
 class Classifier
@@ -32,11 +34,14 @@ private:
     MultiplexGMHMM *positive_model;
     MultiplexGMHMM *negative_model;
     
+    nsga2_params nsga_p;
+    baumwelch_params bw_p;
+    
     std::vector<double> thresholds;
     
 public:
-    MultiplexGMHMMClassifier(int node_count, int sub_count, int type_count); // initialise a random multiplex GMHMM classifier
-    MultiplexGMHMMClassifier(int node_count, int sub_count, int type_count, MultiplexGMHMM *positive, MultiplexGMHMM *negative); // initialise a multiplex GMHMM classifier from parameters 
+    MultiplexGMHMMClassifier(int node_count, int sub_count, int type_count, nsga2_params nsga_p, baumwelch_params bw_p); // initialise a random multiplex GMHMM classifier
+    MultiplexGMHMMClassifier(int node_count, int sub_count, int type_count, nsga2_params nsga_p, baumwelch_params bw_p, MultiplexGMHMM *positive, MultiplexGMHMM *negative); // initialise a multiplex GMHMM classifier from parameters
     ~MultiplexGMHMMClassifier();
 
     Classifier<std::vector<std::pair<int, std::vector<double> > >, bool>* clone();
@@ -62,10 +67,13 @@ private:
     int type_count;
     int label_count; // how many labels do we have?
     std::vector<MultiplexGMHMM*> models;
+    
+    nsga2_params nsga_p;
+    baumwelch_params bw_p;
 
 public:
-    MultiplexKClassifier(int node_count, int sub_count, int type_count, int label_count); // initialise a random k-ary classifier
-    MultiplexKClassifier(int node_count, int sub_count, int type_count, int label_count, std::vector<MultiplexGMHMM*> models); // initialise a k-ary classifier from parameters
+    MultiplexKClassifier(int node_count, int sub_count, int type_count, int label_count, nsga2_params nsga_p, baumwelch_params bw_p); // initialise a random k-ary classifier
+    MultiplexKClassifier(int node_count, int sub_count, int type_count, int label_count, nsga2_params nsga_p, baumwelch_params bw_p, std::vector<MultiplexGMHMM*> models); // initialise a k-ary classifier from parameters
     ~MultiplexKClassifier();
 
     Classifier<std::vector<std::pair<int, std::vector<double> > >, int>* clone();

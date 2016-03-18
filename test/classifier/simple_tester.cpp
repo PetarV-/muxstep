@@ -33,24 +33,25 @@ typedef unsigned long long llu;
 
 int main(int argc, char **argv)
 {
-    if (argc != 3 && argc != 5)
+    if (argc != 4 && argc != 6)
     {
-        printf("Usage: ./simple_tester <node_count> <data_set_file> (<noise_mean_lo>:<noise_mean_step>:<noise_mean_hi> <noise_stddev_lo>:<noise_stddev_step>:<noise_stddev_hi>)\n");
+        printf("Usage: ./simple_tester <node_count> <data_set_file> <training_params_file> (<noise_mean_lo>:<noise_mean_step>:<noise_mean_hi> <noise_stddev_lo>:<noise_stddev_step>:<noise_stddev_hi>)\n");
         return -1;
     }
     
     int node_count;
     sscanf(argv[1], "%d", &node_count);
     tuple<int, int, vector<pair<vector<pair<int, vector<double> > >, bool> > > data = extract_data(argv[2]);
+    pair<nsga2_params, baumwelch_params> params = extract_parameters(argv[3], get<1>(data));
 
-    Classifier<vector<pair<int, vector<double> > >, bool> *C = new MultiplexGMHMMClassifier(node_count, get<0>(data), get<1>(data));
+    Classifier<vector<pair<int, vector<double> > >, bool> *C = new MultiplexGMHMMClassifier(node_count, get<0>(data), get<1>(data), params.first, params.second);
     
-    if (argc == 5) 
+    if (argc == 6)
     {
         double mu_lo, mu_step, mu_hi;
         double sigma_lo, sigma_step, sigma_hi;
-        sscanf(argv[3], "%lf:%lf:%lf", &mu_lo, &mu_step, &mu_hi);
-        sscanf(argv[4], "%lf:%lf:%lf", &sigma_lo, &sigma_step, &sigma_hi);
+        sscanf(argv[4], "%lf:%lf:%lf", &mu_lo, &mu_step, &mu_hi);
+        sscanf(argv[5], "%lf:%lf:%lf", &sigma_lo, &sigma_step, &sigma_hi);
         noise_test(C, get<2>(data), mu_lo, mu_step, mu_hi, sigma_lo, sigma_step, sigma_hi);
     }
     else
