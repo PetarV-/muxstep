@@ -29,6 +29,12 @@ typedef unsigned int uint;
 typedef long long lld;
 typedef unsigned long long llu;
 
+/*
+ This is an experimental class, constructed as heavily similar to MultiplexGMHMMClassifier.
+ Therefore any comments from there (src/classifier/classifier_multiplex_gmhmm.cpp)
+ apply here as well, and comments will be omitted here.
+*/
+
 MultiplexKClassifier::MultiplexKClassifier(int node_count, int sub_count, int type_count, int label_count, nsga2_params nsga_p, baumwelch_params bw_p) : node_count(node_count), sub_count(sub_count), type_count(type_count), label_count(label_count), nsga_p(nsga_p), bw_p(bw_p)
 {
     models.resize(label_count);
