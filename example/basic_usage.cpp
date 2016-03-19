@@ -45,6 +45,7 @@ tuple<int, int, vector<pair<vector<pair<int, vector<double> > >, bool> > > extra
     
     FILE *f = fopen(filename.c_str(), "r");
     
+    // Read the basic parameters: size of training set, sub-output count and type count
     fscanf(f, "%d", &total);
     fscanf(f, "%d%d", &sub_count, &type_count);
     
@@ -53,17 +54,21 @@ tuple<int, int, vector<pair<vector<pair<int, vector<double> > >, bool> > > extra
     for (int i=0;i<total;i++)
     {
         int curr_size;
+        // Read the expected outcome and size of the currently processed sequence
         fscanf(f, "%s%d", expected_outcome, &curr_size);
         ret[i].first.resize(curr_size);
         for (int j=0;j<curr_size;j++) 
         {
+            // Read the sub-output of the current data point
             fscanf(f, "%d", &ret[i].first[j].first);
             ret[i].first[j].second.resize(type_count);
             for (int k=0;k<type_count;k++)
             {
+                // Read the k-th type of the current data point
                 fscanf(f, "%lf", &ret[i].first[j].second[k]);
             }
         }
+        // Assign a label based on whether the outcome is "positive"
         ret[i].second = (strcmp(expected_outcome, "positive") == 0);
     }
     
