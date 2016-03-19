@@ -95,27 +95,6 @@ int NSGAII::get_obj_size()
     return obj_size;
 }
 
-list<chromosome> NSGAII::find_nondominated_front(vector<chromosome> &P)
-{
-    list<chromosome> ret;
-    ret.push_back(P[0]);
-    for (uint i=1;i<P.size();i++)
-    {
-        chromosome p = P[i];
-        bool add_p = true;
-        list<chromosome>::iterator it = ret.begin();
-        while (it != ret.end())
-        {
-            chromosome q = (*it);
-            if (dominated_by(p, q)) ret.erase(it++);
-            else if (dominated_by(q, p)) { add_p = false; break; }
-            else it++;
-        }
-        if (add_p) ret.push_back(p);
-    }
-    return ret;
-}
-
 vector<vector<chromosome> > NSGAII::fast_nondominated_sort(vector<chromosome> &P)
 {
     vector<vector<chromosome> > F;

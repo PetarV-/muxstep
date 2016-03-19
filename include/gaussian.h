@@ -6,6 +6,12 @@
 
 #include <distribution.h>
 
+/*
+ The Gaussian class represents a Gaussian (normal) distribution, which is
+ at the same time a basic example on how to extend the Distribution class, 
+ and also the default distribution used by this model in previous studies.
+*/
+
 class Gaussian : public Distribution
 {
 private:
@@ -16,9 +22,13 @@ private:
     double gaussian_pdf(double x, double mean, double stdev);
     
 public:
+    // create a new untrained Gaussian distribution with a known number of sub-outputs
     Gaussian(int sub_count);
+    // copy a known Gaussian distribution from its parameters
     Gaussian(int sub_count, double *mu, double *sigma);
     ~Gaussian();
+    
+    // Overridden methods from Distribution
     
     Distribution* clone();
     

@@ -298,35 +298,6 @@ double MultiplexGMHMM::log_likelihood(vector<pair<int, vector<double> > > &test_
     return ret;
 }
 
-void MultiplexGMHMM::dump_muxviz_data(char *nodes_filename, char *base_layers_filename)
-{
-    FILE *f = fopen(nodes_filename, "w");
-    
-    fprintf(f, "nodeID nodeX nodeY\n");
-    
-    for (int i=1;i<=n;i++)
-    {
-        fprintf(f, "%d %d %d\n", i, i, 0);
-    }
-    
-    fclose(f);
-    
-    for (int i=0;i<L;i++)
-    {
-        char curr_lyr_filename[150];
-        sprintf(curr_lyr_filename, "%s_%d", base_layers_filename, i+1);
-        FILE *g = fopen(curr_lyr_filename, "w");
-        for (int j=1;j<=n;j++)
-        {
-            for (int k=1;k<=n;k++)
-            {
-                fprintf(g, "%d %d %lf\n", j, k, omega[i][i] * layers[i] -> get_T(j-1, k-1));
-            }
-        }
-        fclose(g);
-    }
-}
-
 istream& operator>>(istream &in, MultiplexGMHMM *&M)
 {
     if (M == NULL) delete M;

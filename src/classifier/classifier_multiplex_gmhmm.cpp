@@ -56,12 +56,6 @@ Classifier<vector<pair<int, vector<double> > >, bool>* MultiplexGMHMMClassifier:
     return new MultiplexGMHMMClassifier(node_count, sub_count, type_count, nsga_p, bw_p, positive_model, negative_model);
 }
 
-void MultiplexGMHMMClassifier::dump_muxviz(char *positive_nodes_filename, char *positive_base_layers_filename, char *negative_nodes_filename, char *negative_base_layers_filename)
-{
-    positive_model -> dump_muxviz_data(positive_nodes_filename, positive_base_layers_filename);
-    negative_model -> dump_muxviz_data(negative_nodes_filename, negative_base_layers_filename);
-}
-
 void MultiplexGMHMMClassifier::train(vector<pair<vector<pair<int, vector<double> > >, bool> > &training_set)
 {
     vector<vector<pair<int, vector<double> > > > train_positive, train_negative;

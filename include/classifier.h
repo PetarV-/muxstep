@@ -13,13 +13,29 @@
 #include <multiplex_gmhmm.h>
 #include <nsga2.h>
 
+/*
+ The Multiplex GMHMM Classifier solves a k-class classification problem by constructing k
+ Multiplex GMHMMs (one per class) and estimating their parameters using their representative
+ sequences in the training set.
+ 
+ Classification of new sequences is then performed by choosing the class corresponding to the
+ Multiplex GMHMM that is most likely to have produced it.
+ 
+ Here the special case of k = 2 (binary classification) is focused on in the MultiplexGMHMMClassifier
+ class; an experimental MultiplexKClassifier class is provided as a means of extending it to
+ the more general case.
+*/
+
+// Specifies a generic classifier class that assigns labels to data.
 template<typename Data, typename Label>
 class Classifier
 {
 public:
     virtual ~Classifier() { }
     virtual Classifier* clone() = 0; // Needed by the evaluator (for parallel crossvalidation)
+    // Train the parameters of the classifier on a given training set
     virtual void train(std::vector<std::pair<Data, Label> > &training_set) = 0;
+    // Assign a label to unseen data
     virtual Label classify(Data &test_data) = 0;
     virtual std::vector<double> get_thresholds() = 0; // Needed by the evaluator (for extracting ROC data)
 };
@@ -37,7 +53,7 @@ private:
     nsga2_params nsga_p;
     baumwelch_params bw_p;
     
-    std::vector<double> thresholds;
+    std::vector<double> thresholds; // Used for generating ROC curve parameters
     
 public:
     MultiplexGMHMMClassifier(int node_count, int sub_count, int type_count, nsga2_params nsga_p, baumwelch_params bw_p); // initialise a random multiplex GMHMM classifier
@@ -45,20 +61,24 @@ public:
     ~MultiplexGMHMMClassifier();
 
     Classifier<std::vector<std::pair<int, std::vector<double> > >, bool>* clone();
-    
-    void dump_muxviz(char *positive_nodes_filename, char *positive_base_layers_filename, char *negative_nodes_filename, char *negative_base_layers_filename); // dump the positive and negative models into a format readable by muxViz
 
     void train(std::vector<std::pair<std::vector<std::pair<int, std::vector<double> > >, bool> > &training_set);
     bool classify(std::vector<std::pair<int, std::vector<double> > > &test_data);
+    
+    // A special classification method, with a second boolean return value specifying
+    // whether the assigned class is chosen with a likelihood margin higher than min_margin
+    // (this can be used to warn the user if a classification may be unreliable)
     std::pair<bool, bool> classify_reliable(std::vector<std::pair<int, std::vector<double> > > &test_data, double min_margin);
     
     std::vector<double> get_thresholds();
 
+    // I/O operator overloads
     friend std::istream& operator>>(std::istream &in, MultiplexGMHMMClassifier *&C);
     friend std::ostream& operator<<(std::ostream &out, const MultiplexGMHMMClassifier *C);
 };
 
 // Experimental (untested) feature: k-ary classifier
+// Most of the implementation is identical in style to above, so repeated comments are omitted
 class MultiplexKClassifier : public Classifier<std::vector<std::pair<int, std::vector<double> > >, int>
 {
 private:
