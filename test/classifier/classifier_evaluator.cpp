@@ -39,6 +39,7 @@ typedef unsigned int uint;
 typedef long long lld;
 typedef unsigned long long llu;
 
+// Averages a sequence of metrics
 run_result mean_result(vector<run_result> &individual)
 {
     int res_cnt = individual.size();
@@ -54,6 +55,7 @@ run_result mean_result(vector<run_result> &individual)
     ret.mcc = 0.0;
     ret.f1_score = 0.0;
     
+    // Simply compute the sample means for the obvious metrics
     for (int i=0;i<res_cnt;i++)
     {
         ret.accuracy += individual[i].accuracy;
@@ -77,6 +79,7 @@ run_result mean_result(vector<run_result> &individual)
     ret.mcc /= (res_cnt * 1.0);
     ret.f1_score /= (res_cnt * 1.0);
     
+    // Combine all of the ROC points of the individual runs into a new plot (with larger resolution)
     priority_queue<pair<double, pair<int, int> > > pq;
     
     double start_point = individual[0].roc_points[0].first;
@@ -119,6 +122,7 @@ run_result mean_result(vector<run_result> &individual)
         }
     }
     
+    // Recompute the new area under the ROC curve
     ret.roc_auc = 0.0;
     for (int i=0;i<res_cnt;i++)
     {
@@ -129,6 +133,7 @@ run_result mean_result(vector<run_result> &individual)
     return ret;
 }
 
+// Computes the standard error in the averages of a sequence of metrics
 run_result stderr_result(vector<run_result> &individual, run_result &means)
 {
     int res_cnt = individual.size();
@@ -147,6 +152,7 @@ run_result stderr_result(vector<run_result> &individual, run_result &means)
     // Must have at least two samples for corrected stddev
     if (res_cnt == 1) return ret;
     
+    // Simply compute the sample standard deviations for most of the metrics
     for (int i=0;i<res_cnt;i++)
     {
         ret.accuracy += (individual[i].accuracy - means.accuracy) * (individual[i].accuracy - means.accuracy);
@@ -191,16 +197,19 @@ run_result stderr_result(vector<run_result> &individual, run_result &means)
     return ret;
 }
 
+// Directly perform a training and testing run, computing all the required metrics
 void parallel_run(Classifier<vector<pair<int, vector<double> > >, bool> *C, vector<pair<vector<pair<int, vector<double> > >, bool> > &training_set, vector<pair<vector<pair<int, vector<double> > >, bool> > &test_set, run_result &ret)
 {
     ret.true_positives = ret.false_positives = 0;
     ret.false_negatives = ret.true_negatives = 0;
     
+    // Train the classifier on the training set
     C -> train(training_set);
 
     int total = test_set.size();
     int total_positives = 0, total_negatives = 0;
-    
+
+    // Apply the classifier on the testing set, recording the metrics obtained
     for (uint i=0;i<test_set.size();i++)
     {
         bool expected_inference = test_set[i].second;
@@ -263,11 +272,12 @@ void parallel_run(Classifier<vector<pair<int, vector<double> > >, bool> *C, vect
     delete C;
 }
 
+// Perform a single evaluation run, for a particular training and testing set split.
 run_result single_run(Classifier<vector<pair<int, vector<double> > >, bool> *C, vector<pair<vector<pair<int, vector<double> > >, bool> > &training_set, vector<pair<vector<pair<int, vector<double> > >, bool> > &test_set, int num_tests, int num_threads)
 {
     run_result max_run;
     max_run.accuracy = -1.0;
-    while (num_tests > 0)
+    while (num_tests > 0) // It is possible to schedule several runs in parallel for this training/test split, and take the maximum
     {
         vector<thread> thrs;
         vector<run_result> ret;
@@ -292,8 +302,10 @@ run_result single_run(Classifier<vector<pair<int, vector<double> > >, bool> *C, 
     return max_run;
 }
 
+// Perform a single stratified k-fold crossvalidation run
 run_result crossvalidate(Classifier<vector<pair<int, vector<double> > >, bool> *C, vector<pair<vector<pair<int, vector<double> > >, bool> > &training_set, int num_tests, int num_threads, int fold_cnt)
 {
+    // Decide on the number of positive and negative examples in a single fold based on total counts
     int total = training_set.size();
     int total_positive = 0, total_negative = 0;
     for (uint i=0;i<training_set.size();i++)
@@ -307,6 +319,7 @@ run_result crossvalidate(Classifier<vector<pair<int, vector<double> > >, bool> *
     int rem_positive = total_positive % fold_cnt;
     int rem_negative = total_negative % fold_cnt;
     
+    // Directly extract the folds
     vector<vector<pair<vector<pair<int, vector<double> > >, bool> > > folds;
     folds.resize(fold_cnt);
     
@@ -341,6 +354,8 @@ run_result crossvalidate(Classifier<vector<pair<int, vector<double> > >, bool> *
     
     delete[] fold_size;
     
+    // Run each of the k crossvalidation steps, at each step using the i-th fold for testing
+    // and the other folds for training
     vector<run_result> individual;
     individual.resize(fold_cnt);
     for (int i=0;i<fold_cnt;i++)
@@ -356,11 +371,13 @@ run_result crossvalidate(Classifier<vector<pair<int, vector<double> > >, bool> *
         printf("Starting crossvalidation step %d\n", i);
         individual[i] = single_run(C, curr_train, curr_test, num_tests, num_threads);
         
+        // Dump the results obtained after this exectuion
         char cur_filename[150];
         sprintf(cur_filename, "results_%02d.out", i);
         dump_result(individual[i], true, cur_filename);
     }
     
+    // Average out the results and dump the averages as well
     run_result ret = mean_result(individual);
     
     char filename[101];
@@ -370,6 +387,7 @@ run_result crossvalidate(Classifier<vector<pair<int, vector<double> > >, bool> *
     return ret;
 }
 
+// Perform a single noise test (for particular noise parameters)
 run_result single_noise_test(Classifier<vector<pair<int, vector<double> > >, bool> *C, vector<pair<vector<pair<int, vector<double> > >, bool> > &training_set, double noise_mean, double noise_stddev, int num_tests)
 {
     printf("Performing a noise test, with the following parameters:\n");
@@ -379,8 +397,10 @@ run_result single_noise_test(Classifier<vector<pair<int, vector<double> > >, boo
     default_random_engine generator(seed);
     normal_distribution<double> noise(noise_mean, noise_stddev);
     
+    // If the noise is N(0, 0), no need to run multiple tests
     if (noise_mean == 0.0 && noise_stddev == 0.0) num_tests = 1;
     
+    // Otherwise, apply the noise and then crossvalidate several times
     vector<run_result> individual;
     individual.resize(num_tests);
     for (int t=0;t<num_tests;t++)
@@ -406,9 +426,11 @@ run_result single_noise_test(Classifier<vector<pair<int, vector<double> > >, boo
         individual[t] = crossvalidate(C, noisy_training_set);
     }
     
+    // Average out the results and compute the standard errors over all the steps
     run_result ret = mean_result(individual);
     run_result dev = stderr_result(individual, ret);
     
+    // Dump the obtained results for this noise test
     char filename[101];
     sprintf(filename, "results_noisy_full.out");
     dump_result(ret, false, filename, noise_mean, noise_stddev);
@@ -418,6 +440,7 @@ run_result single_noise_test(Classifier<vector<pair<int, vector<double> > >, boo
     return ret;
 }
 
+// Perform a full noise test
 void noise_test(Classifier<vector<pair<int, vector<double> > >, bool> *C, vector<pair<vector<pair<int, vector<double> > >, bool> > &training_set, double noise_mean_lo, double noise_mean_step, double noise_mean_hi, double noise_stddev_lo, double noise_stddev_step, double noise_stddev_hi, int num_tests)
 {
     printf("Starting a full noise test, with the following parameters:\n");
@@ -428,6 +451,8 @@ void noise_test(Classifier<vector<pair<int, vector<double> > >, bool> *C, vector
     double mu = noise_mean_lo;
     double sigma = noise_stddev_lo;
     
+    // for each possible configuration of the mean and standard deviation, perform a noise test
+    // and record the results
     do
     {
         do
@@ -448,6 +473,8 @@ void noise_test(Classifier<vector<pair<int, vector<double> > >, bool> *C, vector
     } while (mu <= noise_mean_hi);
 }
 
+// This is a helper method to convert the data given by syn_gen into the format
+// expected by the classifier. It also returns the sub-output and type-count for convenience.
 tuple<int, int, vector<pair<vector<pair<int, vector<double> > >, bool> > > extract_data(string filename)
 {
     int total;
@@ -458,6 +485,7 @@ tuple<int, int, vector<pair<vector<pair<int, vector<double> > >, bool> > > extra
     
     FILE *f = fopen(filename.c_str(), "r");
     
+    // Read the basic parameters: size of training set, sub-output count and type count
     fscanf(f, "%d", &total);
     fscanf(f, "%d%d", &sub_count, &type_count);
     
@@ -466,17 +494,21 @@ tuple<int, int, vector<pair<vector<pair<int, vector<double> > >, bool> > > extra
     for (int i=0;i<total;i++)
     {
         int curr_size;
+        // Read the expected outcome and size of the currently processed sequence
         fscanf(f, "%s%d", expected_outcome, &curr_size);
         ret[i].first.resize(curr_size);
-        for (int j=0;j<curr_size;j++) 
+        for (int j=0;j<curr_size;j++)
         {
+            // Read the sub-output of the current data point
             fscanf(f, "%d", &ret[i].first[j].first);
             ret[i].first[j].second.resize(type_count);
             for (int k=0;k<type_count;k++)
             {
+                // Read the k-th type of the current data point
                 fscanf(f, "%lf", &ret[i].first[j].second[k]);
             }
         }
+        // Assign a label based on whether the outcome is "positive"
         ret[i].second = (strcmp(expected_outcome, "positive") == 0);
     }
     
@@ -485,6 +517,9 @@ tuple<int, int, vector<pair<vector<pair<int, vector<double> > >, bool> > > extra
     return make_tuple(sub_count, type_count, ret);
 }
 
+// This is a helper method to extract training parameters from a file in a specific format
+// This file is expected to have a single key-value pair in each line (see training_params.in for example)
+// If a key is unobserved, a default value will be used
 pair<nsga2_params, baumwelch_params> extract_parameters(string filename, int type_count)
 {
     // Fill up the params with default values
@@ -535,6 +570,7 @@ pair<nsga2_params, baumwelch_params> extract_parameters(string filename, int typ
     return make_pair(nsga_p, bw_p);
 }
 
+// Dump the results into a given file - straightforward
 void dump_result(run_result &res, bool single_run, char* filename, double noise_mean, double noise_stddev)
 {
     FILE *f = fopen(filename, "w");
