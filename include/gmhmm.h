@@ -45,8 +45,8 @@ private:
     
 public:
     GMHMM(int n, int obs); // initialise a random GMHMM
-    GMHMM(int n, int obs, double *pi, double **T, double **O, double *mu, double *sigma); // load a known GMHMM
-    GMHMM(int n, int obs, double *pi, double **T, double **O, Distribution *d); // load a known MHMM (with a custom output distribution)
+    GMHMM(int n, int obs, double *pi, double **T, double **O, double *mu, double *sigma); // load a known GMHMM from parameters
+    GMHMM(int n, int obs, double *pi, double **T, double **O, Distribution *d); // load a known MHMM (with a custom output distribution) from parameters
     GMHMM(GMHMM *gmhmm); // copy an existing (G)MHMM
     ~GMHMM();
 
