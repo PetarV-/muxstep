@@ -97,7 +97,7 @@ public:
     // Initialise the population
     void initialise();
     
-    // Select a chromosome at random
+    // Select a chromosome for crossover
     int select(std::vector<chromosome> &P);
     // Perform crossover between two chromosomes, producing two children chromosomes
     std::pair<chromosome, chromosome> crossover(chromosome &P1, chromosome &P2);
