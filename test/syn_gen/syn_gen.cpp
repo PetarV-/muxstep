@@ -27,6 +27,9 @@ using namespace std;
 typedef long long lld;
 typedef unsigned long long llu;
 
+// A method for comparing tuples based on their euclidean norm (squared).
+// Provided mostly for convenience - can be replaced by a more appropriate
+// comparator, as required.
 bool compare_norm(pair<int, vector<double> > a, pair<int, vector<double> > b)
 {
     double norm_sq_a = 0.0, norm_sq_b = 0.0;
@@ -44,12 +47,14 @@ bool compare_norm(pair<int, vector<double> > a, pair<int, vector<double> > b)
 
 int main(int argc, char **argv)
 {
+    // Require appropriate parameters!
     if (argc != 4 || (argv[3][0] != 'Y' && argv[3][0] != 'N'))
     {
         printf("Usage: ./syn_gen <input_parameters> <output_file> <sort? [Y/N]>\n");
         return -1;
     }
     
+    // Initialise the RNGs used for the normal distributions
     unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
     default_random_engine generator(seed);
     
@@ -60,12 +65,15 @@ int main(int argc, char **argv)
     int n, labels, sub, types;
     int lo, hi;
 
+    // Read basic set parameters
     fscanf(f, "%d%d%d%d", &n, &labels, &sub, &types);
+    // Read the lower and upper bounds on sequence size
     fscanf(f, "%d%d", &lo, &hi);
     
     uniform_int_distribution<int> length_distribution(lo, hi);
     uniform_int_distribution<int> sub_distribution(0, sub - 1);
 
+    // Will generate n examples per label (for obtaining perfect balance)
     fprintf(g, "%d\n", labels * n);
     fprintf(g, "%d %d\n\n", sub, types);
     
@@ -77,6 +85,7 @@ int main(int argc, char **argv)
     
         fscanf(f, "%s", label);
     
+        // Initialise all of the normal distributions from the given parameters
         normal_distribution<double> **N = new normal_distribution<double>*[types];
         
         for (int t=0;t<types;t++)
@@ -92,12 +101,14 @@ int main(int argc, char **argv)
 
         for (int i=0;i<n;i++)
         {
+            // Draw the size of the current sequence at random
             int len = length_distribution(generator);
             fprintf(g, "%s %d\n", label, len);
 
             vector<pair<int, vector<double> > > data;
             data.resize(len);
             
+            // Populate the sequence by sampling the normal distributions
             for (int j=0;j<len;j++)
             {
                 int curr_sub = sub_distribution(generator);
@@ -109,8 +120,10 @@ int main(int argc, char **argv)
                 }
             }
 
+            // Sort, if required
             if (to_sort) sort(data.begin(), data.end(), compare_norm);
 
+            // Output the current sequence in syn_gen format.
             for (int j=0;j<len;j++)
             {
                 fprintf(g, "%d ", data[j].first);
