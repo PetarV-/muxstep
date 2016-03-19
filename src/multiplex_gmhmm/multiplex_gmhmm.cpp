@@ -30,6 +30,7 @@ typedef unsigned int uint;
 typedef long long lld;
 typedef unsigned long long llu;
 
+// initialise a random multiplex GMHMM
 MultiplexGMHMM::MultiplexGMHMM(int n, int obs, int L) : n(n), obs(obs), L(L)
 {
     this -> layers.resize(L);
@@ -49,6 +50,7 @@ MultiplexGMHMM::MultiplexGMHMM(int n, int obs, int L) : n(n), obs(obs), L(L)
     }
 }
 
+// initialise a multiplex GMHMM from parameters
 MultiplexGMHMM::MultiplexGMHMM(int n, int obs, int L, vector<GMHMM*> layers, double **omega) : n(n), obs(obs), L(L)
 {
     this -> layers.resize(L);
@@ -68,6 +70,7 @@ MultiplexGMHMM::MultiplexGMHMM(int n, int obs, int L, vector<GMHMM*> layers, dou
     }
 }
 
+// Copy constructor
 MultiplexGMHMM::MultiplexGMHMM(MultiplexGMHMM *m_gmhmm) : n(m_gmhmm -> n), obs(m_gmhmm -> obs), L(m_gmhmm -> L)
 {
     layers.resize(m_gmhmm -> L);
@@ -94,6 +97,7 @@ MultiplexGMHMM::~MultiplexGMHMM()
     delete[] omega;
 }
 
+// Setter for the interlayer transition matrix; useful while training
 void MultiplexGMHMM::set_omega(double **omega)
 {
     for (int i=0;i<L;i++)
@@ -104,6 +108,7 @@ void MultiplexGMHMM::set_omega(double **omega)
             this -> omega[i][j] = omega[i][j];
             sum += omega[i][j];
         }
+        // Perform normalisation here, just in case
         for (int j=0;j<L;j++)
         {
             this -> omega[i][j] /= sum;
@@ -111,6 +116,7 @@ void MultiplexGMHMM::set_omega(double **omega)
     }
 }
 
+// Train the model parameters from a given training set
 void MultiplexGMHMM::train(vector<vector<pair<int, vector<double> > > > &train_set, nsga2_params &nsga_p, baumwelch_params &bw_p)
 {
     // Train all the layers individually (as before)
@@ -135,6 +141,7 @@ void MultiplexGMHMM::train(vector<vector<pair<int, vector<double> > > > &train_s
     {
         objectives[t] = [this, t, &train_set] (vector<double> X) -> double
         {
+            // Convert the parameters in X into an omega-matrix
             double **temp_omega = new double*[L];
             for (int i=0;i<L;i++)
             {
@@ -145,11 +152,13 @@ void MultiplexGMHMM::train(vector<vector<pair<int, vector<double> > > > &train_s
                 }
             }
             
+            // Set it as the current omega for the model
             set_omega(temp_omega);
             
             for (int i=0;i<L;i++) delete[] temp_omega[i];
             delete[] temp_omega;
             
+            // Evaluate the log-likelihood on this training sequence
             return -log_likelihood(train_set[t]);
         };
     }
@@ -162,7 +171,9 @@ void MultiplexGMHMM::train(vector<vector<pair<int, vector<double> > > > &train_s
     NSGAII nsga2;
     vector<chromosome> candidates = nsga2.optimise(nsga_p, objectives);
     
-    // Evaluate the best choice of omega
+    // Evaluate the best choice of omega out of the ones returned
+    // Here we discriminate by favouring more sequences with good likelihoods
+    // rather than fewer sequences with superb likelihoods.
     int best = -1;
     double min_sum = -1.0;
     for (uint i=0;i<candidates.size();i++)
@@ -197,6 +208,7 @@ void MultiplexGMHMM::train(vector<vector<pair<int, vector<double> > > > &train_s
     delete[] fin_omega;
 }
 
+// Evaluate the log-likelihood of producing a given sequence (just runs the forward algorithm)
 double MultiplexGMHMM::log_likelihood(vector<pair<int, vector<double> > > &test_data)
 {
     double ret = 0.0;
@@ -210,6 +222,9 @@ double MultiplexGMHMM::log_likelihood(vector<pair<int, vector<double> > > &test_
             A[i][j] = new double[n];
         }
     }
+    
+    // Detailed comments about the forward algorithm iteration may be already found
+    // in src/gmhmm/gmhmm.cpp, so they are omitted here.
     
     double *pi = new double[L];
     double pi_sum = 0.0;
@@ -298,6 +313,7 @@ double MultiplexGMHMM::log_likelihood(vector<pair<int, vector<double> > > &test_
     return ret;
 }
 
+// Read a Multiplex GMHMM from a given input stream
 istream& operator>>(istream &in, MultiplexGMHMM *&M)
 {
     if (M == NULL) delete M;
@@ -327,6 +343,7 @@ istream& operator>>(istream &in, MultiplexGMHMM *&M)
     return in;
 }
 
+// Write a multiplex GMHMM to a given output stream
 ostream& operator<<(ostream &out, const MultiplexGMHMM *M)
 {
     out << M -> n << " " << M -> obs << " " << M -> L << endl;
