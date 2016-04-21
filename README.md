@@ -10,7 +10,7 @@ Simply run
 
     $ make
 
-while in the root directory of the repository, and the libraries (both static and dynamic) will be created in the `lib/` folder.
+while in the root directory of the repository, and the libraries (both static and dynamic) will be created in the `lib/` folder. This command will also compile the documentation files (supplementary data as given in the original publication) in `doc/muxstep-suppl.pdf` (`pdflatex` is required for compiling the documentation).
 
 ## Usage example
 
@@ -37,3 +37,13 @@ After doing this, you may run the example using
 ## License
 
 MIT
+
+## References
+
+If you make advantage of muxstep or derive it within your research, please cite the following article:
+
+Veličković, P. and Liò, P. (2016) [muxstep: an open-source C++ multiplex HMM library for making inferences on multiple data types.](http://bioinformatics.oxfordjournals.org/content/early/2016/04/13/bioinformatics.btw196) *Bioinformatics*
+
+The models described here were originally investigated in the following manuscript:
+
+Veličković, P. and Liò, P. (2015) [Molecular multiplex network inference using Gaussian mixture hidden Markov models.](http://comnet.oxfordjournals.org/content/early/2015/12/25/comnet.cnv029) *Journal of Complex Networks*
