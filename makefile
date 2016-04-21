@@ -5,7 +5,7 @@ SFLAGS = -shared -fPIC
 MKDIR_P = mkdir -p
 
 .PHONY : all
-all : static shared
+all : static shared doc
 
 .PHONY : static
 static : $(OBJS)
@@ -16,6 +16,10 @@ static : $(OBJS)
 shared : $(OBJS)
 	$(MKDIR_P) lib/
 	$(CC) $(SFLAGS) $(LFLAGS) -o lib/libmuxstep.dyn.so $(OBJS)
+
+.PHONY : doc
+doc : 
+	$(MAKE) -C doc/ all
 
 build/classifier_multiplex_gmhmm.o :
 	$(MAKE) -C src/classifier/ ../../build/classifier_multiplex_gmhmm.o
@@ -40,4 +44,5 @@ clean :
 	rm -f build/*.o &> /dev/null
 	rm -f lib/*.a &> /dev/null
 	rm -f lib/*.so &> /dev/null
+	$(MAKE) -C doc/ clean
 
