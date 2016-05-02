@@ -30,6 +30,10 @@ typedef unsigned int uint;
 typedef long long lld;
 typedef unsigned long long llu;
 
+// define a RNG for U(0, 1)
+default_random_engine gen_mux;
+uniform_real_distribution<double> rnd_real_mux(0.0, 1.0);
+
 // initialise a random multiplex GMHMM
 MultiplexGMHMM::MultiplexGMHMM(int n, int obs, int L) : n(n), obs(obs), L(L)
 {
@@ -43,9 +47,15 @@ MultiplexGMHMM::MultiplexGMHMM(int n, int obs, int L) : n(n), obs(obs), L(L)
     for (int i=0;i<L;i++)
     {
         this -> omega[i] = new double[L];
+        double total = 0.0;
         for (int j=0;j<L;j++)
         {
-            this -> omega[i][j] = (i == j) ? 1.0 : 0.0;
+            this -> omega[i][j] = rnd_real_mux(gen_mux);
+            total += this -> omega[i][j];
+        }
+        for (int j=0;j<L;j++)
+        {
+            this -> omega[i][j] /= total;
         }
     }
 }
@@ -126,9 +136,15 @@ void MultiplexGMHMM::reset()
 
     for (int i=0;i<L;i++)
     {
+        double total = 0.0;
         for (int j=0;j<L;j++)
         {
-            this -> omega[i][j] = (i == j) ? 1.0 : 0.0;
+            this -> omega[i][j] = rnd_real_mux(gen_mux);
+            total += this -> omega[i][j];
+        }
+        for (int j=0;j<L;j++)
+        {
+            this -> omega[i][j] /= total;
         }
     }
 }
