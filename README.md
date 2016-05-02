@@ -10,7 +10,7 @@ Simply run
 
     $ make
 
-while in the root directory of the repository, and the libraries (both static and dynamic) will be created in the `lib/` folder. This command will also compile the documentation files (supplementary data as given in the original publication) in `doc/muxstep-suppl.pdf` (`pdflatex` is required for compiling the documentation).
+while in the root directory of the repository, and the libraries (both static and dynamic) will be created in the `lib/` folder. This command will also compile the documentation files (supplementary data as given in the original publication) in `doc/muxstep-suppl.pdf` (`latexmk` and `pdflatex` are required for compiling the documentation).
 
 ## Usage example
 

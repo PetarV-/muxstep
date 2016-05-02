@@ -33,6 +33,9 @@ class Classifier
 public:
     virtual ~Classifier() { }
     virtual Classifier* clone() = 0; // Needed by the evaluator (for parallel crossvalidation)
+    // Resets/randomises the values of the parameters (needed by the evaluator)
+    // Potentially a no-op
+    virtual void reset() = 0;
     // Train the parameters of the classifier on a given training set
     virtual void train(std::vector<std::pair<Data, Label> > &training_set) = 0;
     // Assign a label to unseen data
@@ -62,6 +65,7 @@ public:
 
     Classifier<std::vector<std::pair<int, std::vector<double> > >, bool>* clone();
 
+    void reset();
     void train(std::vector<std::pair<std::vector<std::pair<int, std::vector<double> > >, bool> > &training_set);
     bool classify(std::vector<std::pair<int, std::vector<double> > > &test_data);
     
@@ -98,6 +102,7 @@ public:
 
     Classifier<std::vector<std::pair<int, std::vector<double> > >, int>* clone();
 
+    void reset();
     void train(std::vector<std::pair<std::vector<std::pair<int, std::vector<double> > >, int> > &training_set);
     int classify(std::vector<std::pair<int, std::vector<double> > > &test_data);
     std::pair<int, bool> classify_reliable(std::vector<std::pair<int, std::vector<double> > > &test_data, double min_margin);

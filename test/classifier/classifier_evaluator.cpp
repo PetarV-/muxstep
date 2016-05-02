@@ -203,6 +203,9 @@ void parallel_run(Classifier<vector<pair<int, vector<double> > >, bool> *C, vect
     ret.true_positives = ret.false_positives = 0;
     ret.false_negatives = ret.true_negatives = 0;
     
+    // Rerandomise the classifier's parameters
+    C -> reset();
+
     // Train the classifier on the training set
     C -> train(training_set);
 

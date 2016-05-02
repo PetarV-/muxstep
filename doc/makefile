@@ -1,12 +1,5 @@
-PROJECT=muxstep-suppl
-TEX=pdflatex
-BUILDTEX=$(TEX) $(PROJECT).tex
-
-.PHONY : all
-all :
-	$(BUILDTEX) &> /dev/null
-	$(BUILDTEX) &> /dev/null
-	$(BUILDTEX) &> /dev/null
+muxstep-suppl.pdf : muxstep-suppl.tex
+	latexmk -pdf -pdflatex="pdflatex -interaction=nonstopmode" -use-make $<
 
 .PHONY : clean
 clean :

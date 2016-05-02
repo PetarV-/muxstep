@@ -116,6 +116,23 @@ void MultiplexGMHMM::set_omega(double **omega)
     }
 }
 
+// (Re)randomise the model parameters
+void MultiplexGMHMM::reset()
+{
+    for (int l=0;l<L;l++)
+    {
+        layers[l] -> reset();
+    }
+
+    for (int i=0;i<L;i++)
+    {
+        for (int j=0;j<L;j++)
+        {
+            this -> omega[i][j] = (i == j) ? 1.0 : 0.0;
+        }
+    }
+}
+
 // Train the model parameters from a given training set
 void MultiplexGMHMM::train(vector<vector<pair<int, vector<double> > > > &train_set, nsga2_params &nsga_p, baumwelch_params &bw_p)
 {

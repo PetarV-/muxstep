@@ -465,13 +465,9 @@ Distribution* GMHMM::get_D()
     return this -> d;
 }
 
-// Train the model parameters from a given training set
-void GMHMM::train(vector<vector<pair<int, double> > > &train_set, baumwelch_params &params)
+// Re(randomise) the model parameters
+void GMHMM::reset()
 {
-    // train the distribution parameters
-    d -> train(train_set);
-
-    // reset and randomise the initial probabilities
     unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
     gen = default_random_engine(seed);
     
@@ -513,6 +509,13 @@ void GMHMM::train(vector<vector<pair<int, double> > > &train_set, baumwelch_para
             this -> O[i][j] /= total;
         }
     }
+}
+
+// Train the model parameters from a given training set
+void GMHMM::train(vector<vector<pair<int, double> > > &train_set, baumwelch_params &params)
+{
+    // train the distribution parameters
+    d -> train(train_set);
     
     // now run the Baum-Welch algorithm
     baumwelch(train_set, params.iterations, params.tolerance);

@@ -1,4 +1,4 @@
-\documentclass[12pt,openany]{article}
+\documentclass[12pt]{article}
 \usepackage{fullpage}
 \usepackage[UKenglish]{isodate}
 \usepackage[colorlinks=true, linkcolor=black, citecolor=green, filecolor=magenta, urlcolor=blue]{hyperref}
@@ -331,6 +331,8 @@
 	Getter; returns ${\bf O}_{\tt xy}$.
 	\fundef{GMHMM::get\_D()}
 	Getter; returns the probability distribution used by this (G)MHMM.
+	\fundef{GMHMM::reset()}
+	(Re)randomises all of the model's parameters.
 	\textcolor{red}{\fundef{GMHMM::train(train\_set, params)}}
 	Trains the model parameters using the data in {\tt train\_set}, using the parameters in {\tt params} for the Baum-Welch algorithm.
 	\fundef{GMHMM::log\_likelihood(test\_data)}
@@ -351,6 +353,8 @@
 	Destructor; clears all resources used.
 	\fundef{MultiplexGMHMM::set\_omega(omega)}
 	Setter; sets the matrix $\boldsymbol\omega$ to the values in {\tt omega} and normalises all transition probabilities.
+	\fundef{MultiplexGMHMM::reset()}
+	(Re)randomises all of the model's parameters.
 	\textcolor{red}{\fundef{MultiplexGMHMM::train(train\_set, nsga\_p, bw\_p)}}
 	Trains the model parameters using the data in {\tt train\_set}, using the parameters in {\tt nsga\_p} for NSGA-II and the parameters in {\tt bw\_p} for the Baum-Welch algorithm.
 	\fundef{MultiplexGMHMM::log\_likelihood(test\_data)}
@@ -370,6 +374,8 @@
 	Destructor; clears all resources used.
 	\fundef{MultiplexGMHMMClassifier::clone()}
 	Returns a clone of a given multiplex GMHMM classifier.
+	\fundef{\textcolor{blue}{MultiplexGMHMMClassifier::reset()}}
+	(Re)randomises all of the model's parameters.
 	\fundef{\textcolor{blue}{MultiplexGMHMMClassifier::train(training\_set)}}
 	Trains the model parameters using the data in {\tt training\_set}.
 	\fundef{\textcolor{blue}{MultiplexGMHMMClassifier::classify(test\_data)}}

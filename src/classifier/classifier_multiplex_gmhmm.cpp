@@ -59,6 +59,13 @@ Classifier<vector<pair<int, vector<double> > >, bool>* MultiplexGMHMMClassifier:
     return new MultiplexGMHMMClassifier(node_count, sub_count, type_count, nsga_p, bw_p, positive_model, negative_model);
 }
 
+// (Re)randomises the classifier parameters
+void MultiplexGMHMMClassifier::reset()
+{
+    positive_model -> reset();
+    negative_model -> reset();
+}
+
 // Train the parameters of the classifier on a given training set
 void MultiplexGMHMMClassifier::train(vector<pair<vector<pair<int, vector<double> > >, bool> > &training_set)
 {

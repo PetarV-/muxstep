@@ -41,7 +41,9 @@ public:
 
     // Setter for the interlayer transition matrix; useful while training
     void set_omega(double **omega);
-    
+
+    // (Re)randomises the model parameters
+    void reset();
     // Train the model parameters from a given training set
     void train(std::vector<std::vector<std::pair<int, std::vector<double> > > > &train_set, nsga2_params &nsga_p, baumwelch_params &bw_p);
     // Evaluate the log-likelihood of producing a given sequence (just runs the forward algorithm)

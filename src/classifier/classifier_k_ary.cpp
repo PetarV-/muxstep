@@ -66,6 +66,14 @@ Classifier<vector<pair<int, vector<double> > >, int>* MultiplexKClassifier::clon
     return new MultiplexKClassifier(node_count, sub_count, type_count, label_count, nsga_p, bw_p, models);
 }
 
+void MultiplexKClassifier::reset()
+{
+    for (int i=0;i<label_count;i++)
+    {
+        models[i] -> reset();
+    }
+}
+
 void MultiplexKClassifier::train(vector<pair<vector<pair<int, vector<double> > >, int> > &training_set)
 {
     vector<vector<vector<pair<int, vector<double> > > > > train;

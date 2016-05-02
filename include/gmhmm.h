@@ -91,6 +91,8 @@ public:
     double get_O(int x, int y);
     Distribution* get_D();
     
+    // (Re)randomise the model parameters
+    void reset();
     // Train the model parameters from a given training set
     void train(std::vector<std::vector<std::pair<int, double> > > &train_set, baumwelch_params &params);
     // Evaluate the log-likelihood of producing a given sequence (just runs the forward algorithm)

@@ -19,7 +19,7 @@ shared : $(OBJS)
 
 .PHONY : doc
 doc : 
-	$(MAKE) -C doc/ all
+	$(MAKE) -C doc/ muxstep-suppl.pdf
 
 build/classifier_multiplex_gmhmm.o :
 	$(MAKE) -C src/classifier/ ../../build/classifier_multiplex_gmhmm.o
