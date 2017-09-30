@@ -102,7 +102,7 @@ void Gaussian::train(vector<vector<pair<int, double> > > &train_set)
         
     for (int i=0;i<obs;i++) sigma[i] = sqrt(sigma[i] / (cnt[i] - 1));
         
-    delete cnt;
+    delete[] cnt;
 }
 
 // Get the probability of producing output x, assuming the sub-output is obs_id
